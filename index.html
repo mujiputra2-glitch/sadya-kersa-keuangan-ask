@@ -590,6 +590,29 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
 }
 @media (max-width:600px){.qi{grid-template-columns:minmax(0,1fr)}.qi .where,.qi .acts2,.qi .done-by{grid-column:1}.cop.full .sugg{grid-template-columns:minmax(0,1fr)}.fx-grid{grid-template-columns:minmax(0,1fr)}.cop.full .cop-b{padding:16px 14px 10px}.cop.full .cop-f{padding:6px 12px 14px}.cop.full .cop-h{padding:10px 12px}}
 @media (max-width:520px){.kstrip{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.kc{padding:12px 12px 6px}.kc .v{font-size:19px}.kc .sp{height:30px}}
+/* ---------- Telepon (21 Nov, HANDOFF P42): a voice call to the assistant ---------- */
+.call{position:fixed;inset:0;z-index:85;background:rgba(15,23,42,.38);display:flex;align-items:center;justify-content:center;padding:16px}
+.call[hidden]{display:none}
+.call-card{width:min(440px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;gap:12px;background:var(--surface);border-radius:18px;padding:18px;box-shadow:0 24px 60px rgba(15,23,42,.22)}
+.call-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.call-head b{display:block;font-size:16px;color:var(--ink)}
+.call-head span{display:block;font-size:13px;color:var(--ink2);margin-top:2px}
+.call-time{font-weight:700;color:var(--ink2);font-size:14px}
+.call-orb{align-self:center;width:84px;height:84px;border-radius:50%;background:var(--brand-soft);display:flex;align-items:center;justify-content:center}
+.call-orb i{width:44px;height:44px;border-radius:50%;background:var(--brand);transition:transform .15s}
+.call.talk .call-orb i{animation:callPulse 1.1s ease-in-out infinite}
+@keyframes callPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.call-hint{margin:0;font-size:13px;line-height:1.5;color:var(--ink2);text-align:center}
+.call-log{flex:1;min-height:90px;max-height:38vh;overflow:auto;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45}
+.call-log p{margin:0;padding:7px 10px;border-radius:10px;max-width:88%}
+.call-log .u{align-self:flex-end;background:var(--brand-soft);color:var(--ink)}
+.call-log .a{align-self:flex-start;background:#f2f4f7;color:var(--ink)}
+.call-log .t{align-self:center;background:none;color:var(--muted);font-size:12.5px;padding:2px}
+.call-acts{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.call-acts .end{background:var(--down);border-color:var(--down);color:#fff}
+.call-msg{margin:0;font-size:13px;color:var(--down);text-align:center}
+.call-msg.ok{color:var(--up)}
+@media (max-width:520px){.call{padding:0}.call-card{border-radius:0;height:100%;max-height:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{.side,.topbar .acts,.cop,.dock,.toast,.drop,.chips{display:none!important}.app{display:block}.card{break-inside:avoid}}
 </style>
@@ -642,6 +665,7 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
         <div class="acts">
           <div class="per"><select id="finPer" aria-label="Periode"></select><span id="finCustom" hidden><input type="date" id="finFrom" aria-label="Dari tanggal"> <input type="date" id="finTo" aria-label="Sampai tanggal"> <button class="btn" type="button" id="finApply">Terapkan</button></span></div>
           <button class="btn" type="button" id="finIsi" hidden>Isi data</button>
+          <button class="btn" type="button" id="finCall" title="Telepon asisten keuangan (suara)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5.5 3h2.2l1.1 3.3-1.6 1.1a10.5 10.5 0 0 0 5.4 5.4l1.1-1.6L17 12.3v2.2A1.5 1.5 0 0 1 15.5 16C9.2 16 4 10.8 4 4.5A1.5 1.5 0 0 1 5.5 3z"/></svg>Telepon</button>
           <button class="btn pri" type="button" id="finAsk"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9l-4 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z"/><path d="M6.5 8.5h7M6.5 11h4.5"/></svg>Tanya Copilot</button>
         </div>
       </div>
@@ -670,6 +694,21 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
       <button class="send" type="submit" id="copSend" aria-label="Kirim"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 16V4M5 9l5-5 5 5"/></svg></button></form>
     <p class="cop-note">Angka diambil dari data keuangan. Perubahan data selalu ditanyakan dulu.</p>
   </div></div>
+</section>
+<section class="call" id="call" role="dialog" aria-modal="true" aria-labelledby="callT" hidden>
+  <div class="call-card">
+    <div class="call-head"><div><b id="callT">Telepon asisten keuangan</b><span id="callSt">Siap menelepon</span></div><span class="call-time num" id="callTime">0:00</span></div>
+    <div class="call-orb" aria-hidden="true"><i></i></div>
+    <p class="call-hint" id="callHint">Bicara seperti menelepon, boleh Bahasa Indonesia atau Sunda. Perubahan data hanya untuk Muji dan Wildan, setelah menjawab "ya".</p>
+    <div class="call-log" id="callLog" aria-live="polite"></div>
+    <p class="call-msg" id="callMsg" role="status" hidden></p>
+    <div class="call-acts">
+      <button class="btn" type="button" id="callMute" hidden>Bisukan</button>
+      <button class="btn pri" type="button" id="callGo">Mulai telepon</button>
+      <button class="btn end" type="button" id="callEnd" hidden>Akhiri</button>
+      <button class="btn" type="button" id="callClose">Tutup</button>
+    </div>
+  </div>
 </section>
 <script>
 // Web version (dashboard.sadyakersa.com): google.script.run goes to the dashboard API, behind Sign in with Google.
@@ -2007,8 +2046,152 @@ function finTab(t) {
   window.scrollTo({ top: 0 });
 }
 var MARK_SVG = '<svg viewBox="-26 -28 156 156" aria-hidden="true"><rect x="-26" y="-28" width="156" height="156" rx="34" fill="#2728c0"/><path d="M104,12 H31 A19,19 0 0 0 31,50 H54" fill="none" stroke="#fff" stroke-width="24" stroke-linejoin="round"/><path d="M52,50 H73 A19,19 0 0 1 73,88 H0" fill="none" stroke="#fb4305" stroke-width="24" stroke-linejoin="round"/></svg>';
+// ---------- Telepon (21 Nov, HANDOFF P42; Muji: "use my gemini account so the AI agent can take a call please, everyone
+// can take a call but only me and wildan can give intruction to change the data") ----------
+// finSuaraMulai (Suara.js) gives a one-use Gemini Live token whose model, instructions and tools are fixed on the server.
+// The microphone goes to Gemini as 16 kHz PCM, the answer comes back as 24 kHz PCM; every tool call goes to
+// finSuaraAlat with what the microphone heard since the assistant last spoke, so a change is saved only when the caller
+// said "ya" (and only for Keuangan input). At the end the live transcript and the caller's recording go to
+// finSuaraSelesai (tab Panggilan, transcript re-made for Indonesian and Sundanese).
+var CALL = { on: false };
+var CALL_WS = 'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=';
+var CALL_WORKLET = 'class P extends AudioWorkletProcessor{constructor(){super();this.b=[];this.n=0}process(i){var c=i[0]&&i[0][0];if(c){this.b.push(new Float32Array(c));this.n+=c.length;' +
+  'if(this.n>=1600){var o=new Float32Array(this.n),k=0;this.b.forEach(function(x){o.set(x,k);k+=x.length});this.b=[];this.n=0;this.port.postMessage(o,[o.buffer])}}return true}}registerProcessor("mic16",P)';
+var CALL_TOOL = { laporan_keuangan: 'Membuka laporan keuangan', mutasi_bank: 'Melihat rekening koran', catatan_perlu_dicek: 'Melihat catatan perlu dicek', proyek_dan_sekolah: 'Melihat proyek dan sekolah',
+  cari_jurnal_ask: 'Mencari di jurnal ASK', cari_invoice_sekolah: 'Mencari invoice sekolah', pajak_dipungut: 'Menghitung pajak', simulasi_pajak: 'Menghitung simulasi pajak', simpan_perubahan: 'Menyimpan perubahan',
+  tanya_wildan: 'Mencatat pertanyaan untuk Wildan', kesehatan_keuangan: 'Melihat kesehatan keuangan', cek_tutup_buku: 'Melihat cek tutup buku', kalender_pajak: 'Melihat kalender pajak' };
+function callState(t) { $('callSt').textContent = t; }
+function callMsg(t, ok) { var m = $('callMsg'); m.hidden = !t; m.textContent = t || ''; m.className = 'call-msg' + (ok ? ' ok' : ''); }
+function callLine(r, t) {
+  var log = $('callLog'), last = CALL.turns[CALL.turns.length - 1];
+  if (r !== 't' && last && last.r === r) { last.t += t; last.el.textContent = last.t; }
+  else { var p = document.createElement('p'); p.className = r; p.textContent = t; log.appendChild(p); if (r !== 't') CALL.turns.push({ r: r, t: t, el: p }); }
+  log.scrollTop = log.scrollHeight;
+}
+function callOpen() {
+  $('call').hidden = false; callMsg('');
+  if (!CALL.on) { $('callGo').hidden = false; $('callEnd').hidden = true; $('callMute').hidden = true; callState('Siap menelepon'); }
+}
+function callClose() { if (CALL.on) callEnd('Panggilan diakhiri'); $('call').hidden = true; }
+function callB64(f32, rate) {
+  if (rate !== 16000) { var n = Math.floor(f32.length * 16000 / rate), o = new Float32Array(n); for (var i = 0; i < n; i++) o[i] = f32[Math.min(f32.length - 1, Math.floor(i * rate / 16000))]; f32 = o; }
+  var b = new ArrayBuffer(f32.length * 2), v = new DataView(b);
+  for (var k = 0; k < f32.length; k++) { var x = Math.max(-1, Math.min(1, f32[k])); v.setInt16(k * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
+  var u = new Uint8Array(b), s = '';
+  for (var j = 0; j < u.length; j += 0x8000) s += String.fromCharCode.apply(null, u.subarray(j, j + 0x8000));
+  return btoa(s);
+}
+function callPlay(b64) {
+  var bin = atob(b64), n = bin.length >> 1, f = new Float32Array(n);
+  for (var i = 0; i < n; i++) { var x = bin.charCodeAt(2 * i) | (bin.charCodeAt(2 * i + 1) << 8); if (x >= 32768) x -= 65536; f[i] = x / 32768; }
+  var ctx = CALL.out, buf = ctx.createBuffer(1, n, 24000);
+  buf.getChannelData(0).set(f);
+  var src = ctx.createBufferSource(), t = Math.max(CALL.next, ctx.currentTime + 0.03);
+  src.buffer = buf; src.connect(ctx.destination); src.start(t);
+  CALL.next = t + buf.duration; CALL.srcs.push(src);
+  $('call').classList.add('talk');
+  src.onended = function () { CALL.srcs = CALL.srcs.filter(function (x) { return x !== src; }); if (!CALL.srcs.length) $('call').classList.remove('talk'); };
+}
+function callHush() { CALL.srcs.forEach(function (x) { try { x.stop(); } catch (e) { /* already stopped */ } }); CALL.srcs = []; CALL.next = 0; $('call').classList.remove('talk'); }
+function callSend(o) { if (CALL.ws && CALL.ws.readyState === 1) CALL.ws.send(JSON.stringify(o)); }
+function callTool(fc) {
+  var heard = CALL.heard;
+  callLine('t', (CALL_TOOL[fc.name] || 'Memeriksa data') + '...');
+  google.script.run.withSuccessHandler(function (res) { callSend({ toolResponse: { functionResponses: [{ id: fc.id, name: fc.name, response: { result: res } }] } }); })
+    .withFailureHandler(function (e) { callSend({ toolResponse: { functionResponses: [{ id: fc.id, name: fc.name, response: { error: String(e && e.message || e) } }] } }); })
+    .finSuaraAlat(CALL.id, fc.name, fc.args || {}, heard);
+}
+function callIn(txt) {
+  var m;
+  try { m = JSON.parse(txt); } catch (e) { return; }
+  if (m.setupComplete) { CALL.ready = true; callState('Tersambung'); callSend({ realtimeInput: { text: '(Panggilan baru tersambung. Sapa penelepon dengan singkat.)' } }); return; }
+  if (m.toolCall) { (m.toolCall.functionCalls || []).forEach(callTool); return; }
+  if (m.goAway) { callState('Panggilan akan berakhir sebentar lagi'); return; }
+  var sc = m.serverContent;
+  if (!sc) return;
+  if (sc.interrupted) callHush();
+  ((sc.modelTurn && sc.modelTurn.parts) || []).forEach(function (p) { if (p.inlineData && p.inlineData.data) callPlay(p.inlineData.data); });
+  if (sc.inputTranscription && sc.inputTranscription.text) { if (CALL.lastRole === 'a') CALL.heard = ''; CALL.heard += sc.inputTranscription.text; CALL.lastRole = 'u'; callLine('u', sc.inputTranscription.text); }
+  if (sc.outputTranscription && sc.outputTranscription.text) { CALL.lastRole = 'a'; callLine('a', sc.outputTranscription.text); }
+}
+function callTick() {
+  var s = Math.floor((Date.now() - CALL.t0) / 1000), left = CALL.maks - s;
+  $('callTime').textContent = Math.floor(s / 60) + ':' + ('0' + s % 60).slice(-2);
+  if (left === 60) callState('Sisa 1 menit');
+  if (left <= 0) callEnd('Batas ' + Math.round(CALL.maks / 60) + ' menit tercapai');
+}
+function callStart() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.WebSocket) { callMsg('Browser ini belum bisa menelepon. Pakai Chrome terbaru.'); return; }
+  $('callGo').disabled = true; callMsg(''); callState('Meminta izin mikrofon...');
+  navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } }).then(function (stream) {
+    CALL.stream = stream; callState('Menyambungkan...');
+    google.script.run.withSuccessHandler(function (r) { callConnect(r); })
+      .withFailureHandler(function (e) { callStop(); $('callGo').disabled = false; callState('Belum tersambung'); callMsg(String(e && e.message || e)); })
+      .finSuaraMulai(FIN_SITE);
+  }).catch(function () { $('callGo').disabled = false; callState('Belum tersambung'); callMsg('Izin mikrofon ditolak. Izinkan mikrofon untuk halaman ini, lalu coba lagi.'); });
+}
+function callConnect(r) {
+  CALL.on = true; CALL.ready = false; CALL.id = r.panggilan; CALL.maks = r.maksDetik || 600; CALL.turns = []; CALL.heard = ''; CALL.lastRole = ''; CALL.srcs = []; CALL.next = 0; CALL.chunks = [];
+  $('callLog').innerHTML = ''; $('callGo').hidden = true; $('callGo').disabled = false; $('callEnd').hidden = false; $('callMute').hidden = false; $('callMute').textContent = 'Bisukan';
+  $('callHint').textContent = r.bisaUbah ? 'Bicara seperti menelepon, boleh Bahasa Indonesia atau Sunda. Untuk mengubah data, asisten membacakan perubahannya dan menunggu jawaban "ya".' : 'Bicara seperti menelepon, boleh Bahasa Indonesia atau Sunda. Akun ini hanya bisa bertanya; perubahan data hanya untuk Muji dan Wildan.';
+  CALL.out = new (window.AudioContext || window.webkitAudioContext)();
+  try { CALL.inp = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 }); } catch (e) { CALL.inp = new (window.AudioContext || window.webkitAudioContext)(); }
+  var mime = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4'].filter(function (t) { return window.MediaRecorder && MediaRecorder.isTypeSupported(t); })[0];
+  if (mime) { CALL.mime = mime; CALL.rec = new MediaRecorder(CALL.stream, { mimeType: mime, audioBitsPerSecond: 24000 }); CALL.rec.ondataavailable = function (e) { if (e.data && e.data.size) CALL.chunks.push(e.data); }; CALL.rec.start(1000); }
+  var src = CALL.inp.createMediaStreamSource(CALL.stream), rate = CALL.inp.sampleRate;
+  var feed = function (f32) { if (CALL.ready && !CALL.muted) callSend({ realtimeInput: { audio: { data: callB64(f32, rate), mimeType: 'audio/pcm;rate=16000' } } }); };
+  var useNode = function () {
+    var sp = CALL.inp.createScriptProcessor(2048, 1, 1);
+    sp.onaudioprocess = function (e) { feed(new Float32Array(e.inputBuffer.getChannelData(0))); };
+    src.connect(sp); sp.connect(CALL.inp.destination); CALL.node = sp;
+  };
+  if (CALL.inp.audioWorklet) {
+    CALL.inp.audioWorklet.addModule(URL.createObjectURL(new Blob([CALL_WORKLET], { type: 'application/javascript' }))).then(function () {
+      var wn = new AudioWorkletNode(CALL.inp, 'mic16'); wn.port.onmessage = function (e) { feed(e.data); }; src.connect(wn); CALL.node = wn;
+    }).catch(useNode);
+  } else useNode();
+  CALL.ws = new WebSocket(CALL_WS + encodeURIComponent(r.token));
+  CALL.ws.onopen = function () { callSend({ setup: { model: 'models/' + r.model } }); };
+  CALL.ws.onmessage = function (ev) { (typeof ev.data === 'string' ? Promise.resolve(ev.data) : ev.data.text()).then(callIn); };
+  CALL.ws.onclose = function (e) { if (CALL.on) callEnd(CALL.ready ? 'Sambungan terputus' : 'Gemini menolak sambungan (' + e.code + ')'); };
+  CALL.t0 = Date.now(); $('callTime').textContent = '0:00'; CALL.timer = setInterval(callTick, 1000);
+}
+function callStop() {
+  try { if (CALL.stream) CALL.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) { /* gone */ }
+  try { if (CALL.node) CALL.node.disconnect(); } catch (e) { /* gone */ }
+  try { if (CALL.inp) CALL.inp.close(); } catch (e) { /* gone */ }
+  CALL.stream = null; CALL.node = null; CALL.inp = null;
+}
+function callEnd(why) {
+  if (!CALL.on) return;
+  CALL.on = false; clearInterval(CALL.timer); callHush();
+  var secs = Math.round((Date.now() - CALL.t0) / 1000), turns = CALL.turns.map(function (t) { return { r: t.r, t: t.t }; }), id = CALL.id;
+  try { if (CALL.ws) CALL.ws.close(1000); } catch (e) { /* closed */ }
+  $('callEnd').hidden = true; $('callMute').hidden = true; $('callGo').hidden = false;
+  callState((why || 'Panggilan selesai') + '. Menyimpan transkrip...');
+  var save = function (b64) {
+    google.script.run.withSuccessHandler(function (r) { callState(why || 'Panggilan selesai'); callMsg(r && r.ok ? 'Transkrip tersimpan di tab Panggilan' + (r.transkrip === 'bersih' ? '.' : ' (transkrip langsung saja: ' + (r.catatan || 'tanpa rekaman') + ').') : (r && r.catatan) || 'Transkrip belum tersimpan.', r && r.ok); })
+      .withFailureHandler(function (e) { callState(why || 'Panggilan selesai'); callMsg('Transkrip belum tersimpan: ' + String(e && e.message || e)); })
+      .finSuaraSelesai(id, turns, b64, CALL.mime || '', secs);
+    try { if (CALL.out) CALL.out.close(); } catch (e) { /* closed */ }
+  };
+  var rec = CALL.rec; CALL.rec = null;
+  if (rec && rec.state !== 'inactive') {
+    rec.onstop = function () { var blob = new Blob(CALL.chunks, { type: CALL.mime }), fr = new FileReader(); fr.onload = function () { save(String(fr.result).split(',')[1] || ''); }; fr.readAsDataURL(blob); callStop(); };
+    rec.stop();
+  } else { callStop(); save(''); }
+}
+function callInit() {
+  $('finCall').addEventListener('click', callOpen);
+  $('callGo').addEventListener('click', callStart);
+  $('callEnd').addEventListener('click', function () { callEnd('Panggilan diakhiri'); });
+  $('callClose').addEventListener('click', callClose);
+  $('callMute').addEventListener('click', function () { CALL.muted = !CALL.muted; $('callMute').textContent = CALL.muted ? 'Nyalakan mikrofon' : 'Bisukan'; callState(CALL.muted ? 'Mikrofon dibisukan' : 'Tersambung'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('call').hidden && !CALL.on) callClose(); });
+}
 function skStart() {
   finSiteUi();
+  callInit();
   copStart();
   finPeriods();
   $('finIsi').addEventListener('click', function () { finTab('bank'); });
