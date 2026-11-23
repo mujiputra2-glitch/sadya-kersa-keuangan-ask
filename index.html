@@ -294,6 +294,14 @@ tr.total td{font-weight:800;font-size:15px;border-top:2px solid var(--ink);borde
 .fx-grid label.hl input,.fx-grid label.hl select{border-color:var(--accent);box-shadow:0 0 0 3px rgba(251,67,5,.12)}
 .fx-grid label.done input,.fx-grid label.done select{border-color:var(--up);box-shadow:0 0 0 3px rgba(14,122,82,.12)}
 .fx-wide{width:100%}
+/* 23 Nov: Penyesuaian and the CV switch */
+.adj-hint{font-size:12.5px;color:var(--ink2);margin:0 0 12px}
+.adj-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.adj-st{font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 8px;background:#e7f5ee;color:var(--up)}
+.adj-st.off{background:#f1f2f6;color:var(--muted)}
+tr.off td{color:var(--muted)}
+.cvtag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--brand-wash);color:var(--brand);margin-left:4px}
+.cvnote{font-size:12.5px;color:var(--ink2);margin:0 0 14px}
 .fx-sug{display:flex;align-items:center;justify-content:space-between;gap:8px 12px;flex-wrap:wrap;background:var(--surface);border:1px dashed #c9cdf6;border-radius:10px;padding:9px 12px;margin-bottom:12px;font-size:12.5px;color:var(--ink2)}
 .fx-sug b{color:var(--ink)}
 .fx-act{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
@@ -577,6 +585,8 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
   .acts{width:100%}
   .per{flex:1;min-width:0}
   .per select{flex:1;min-width:0}
+  /* 23 Nov: with the CV switch the period row gets its own line so both stay readable */
+  .per:has(#finCv:not([hidden])){flex:1 1 100%}
   #finAsk{display:none}
   .content{padding:16px 16px 96px}
   .cop.open.side{left:0;border-left:0}
@@ -651,6 +661,7 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
       <div class="nav">
         <button type="button" role="tab" data-tab="proyek" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V8l7-4 7 4v9"/><path d="M8 17v-5h4v5"/></svg><span id="finProyekTab">Proyek dan sekolah</span></button>
         <button type="button" role="tab" data-tab="bank" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="15" height="11" rx="2"/><path d="M2.5 9h15M6 13h3"/></svg><span>Rekening koran</span></button>
+        <button type="button" role="tab" data-tab="adj" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h12M4 10h7M4 14.5h5"/><path d="M15 11.5v6M12 14.5h6"/></svg><span>Penyesuaian</span></button>
         <button type="button" role="tab" data-tab="cek" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 17.5 16.5h-15L10 3.5z"/><path d="M10 9v3M10 14.3v.2"/></svg><span>Perlu dicek</span><span class="cnt" id="finBadge" hidden></span></button>
         <button type="button" role="tab" data-tab="sumber" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5" rx="6" ry="2.3"/><path d="M4 5v10c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V5M4 10c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3"/></svg><span>Sumber data</span></button>
       </div>
@@ -663,7 +674,7 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
         <button class="menu" type="button" id="finMenu" aria-label="Buka menu" aria-controls="finSide"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h14M3 10h14M3 14h14"/></svg></button>
         <div class="ttl"><h1 id="finTitle">Ringkasan</h1><p id="finSub">Memuat laporan...</p></div>
         <div class="acts">
-          <div class="per"><select id="finPer" aria-label="Periode"></select><span id="finCustom" hidden><input type="date" id="finFrom" aria-label="Dari tanggal"> <input type="date" id="finTo" aria-label="Sampai tanggal"> <button class="btn" type="button" id="finApply">Terapkan</button></span></div>
+          <div class="per"><select id="finCv" aria-label="CV" hidden></select><select id="finPer" aria-label="Periode"></select><span id="finCustom" hidden><input type="date" id="finFrom" aria-label="Dari tanggal"> <input type="date" id="finTo" aria-label="Sampai tanggal"> <button class="btn" type="button" id="finApply">Terapkan</button></span></div>
           <button class="btn" type="button" id="finIsi" hidden>Isi data</button>
           <button class="btn" type="button" id="finCall" title="Telepon asisten keuangan (suara)"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5.5 3h2.2l1.1 3.3-1.6 1.1a10.5 10.5 0 0 0 5.4 5.4l1.1-1.6L17 12.3v2.2A1.5 1.5 0 0 1 15.5 16C9.2 16 4 10.8 4 4.5A1.5 1.5 0 0 1 5.5 3z"/></svg>Telepon</button>
           <button class="btn pri" type="button" id="finAsk"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9l-4 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z"/><path d="M6.5 8.5h7M6.5 11h4.5"/></svg>Tanya Copilot</button>
@@ -874,7 +885,7 @@ var SITE = {
   ASK: { brand: 'Amanah Sadya Kersa', sub: 'Keuangan ASK (proyek)', title: 'Keuangan Amanah Sadya Kersa (ASK)', tab: 'Proyek', load: 'Membaca jurnal ASK dan rekening koran ASK.', dash: false,
     chips: [], acc: [['ASK', 'BRI ASK (pembanding Kas Bri)']] }
 }[FIN_SITE];
-var FIN = { data: null, co: FIN_SITE, tab: 'ringkasan', from: '', to: '', charts: [], bankFilter: FIN_SITE === 'ASK' ? 'all' : 'todo', open: {} };
+var FIN = { data: null, co: FIN_SITE, cv: 'ALL', tab: 'ringkasan', from: '', to: '', charts: [], bankFilter: FIN_SITE === 'ASK' ? 'all' : 'todo', open: {} };
 // The server sends both companies; this page keeps its own notes (f.co, Finance.js) and bank lines, and counts again.
 function finSiteData(d) {
   d.flags = (d.flags || []).filter(function (f) { return (f.co || 'SK') === FIN_SITE; });
@@ -892,12 +903,14 @@ function finSiteUi() {
   $('finBrand').textContent = SITE.brand; $('finBrandSub').textContent = SITE.sub;
   $('finProyekTab').textContent = SITE.tab; TITLES.proyek = SITE.tab;
   if (!SITE.dash) $('finDash').remove();
+  // 23 Nov: the four CVs and Penyesuaian are the SK side's only
+  if (FIN_SITE !== 'SK') { var at = document.querySelector('#finNav [data-tab="adj"]'); if (at) at.remove(); $('finCv').remove(); }
   if ($('finLoadTxt')) $('finLoadTxt').textContent = SITE.load;
   Array.prototype.forEach.call(document.querySelectorAll('#finCo button'), function (b) { if (b.getAttribute('data-co') !== FIN_SITE) b.remove(); else b.setAttribute('aria-pressed', 'true'); });
 }
 var BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 var BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-var TITLES = { ringkasan: 'Ringkasan', lr: 'Laba rugi', neraca: 'Neraca', arus: 'Arus kas', proyek: 'Proyek dan sekolah', bank: 'Rekening koran', cek: 'Perlu dicek', sumber: 'Sumber data' };
+var TITLES = { ringkasan: 'Ringkasan', lr: 'Laba rugi', neraca: 'Neraca', arus: 'Arus kas', proyek: 'Proyek dan sekolah', bank: 'Rekening koran', adj: 'Penyesuaian', cek: 'Perlu dicek', sumber: 'Sumber data' };
 var CHAT_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9l-4 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z"/></svg>';
 var CHEV = '<svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 2.5 8 6l-3.5 3.5"/></svg>';
 var OK_IC = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M5.3 8.2 7.2 10l3.5-4"/></svg>';
@@ -915,8 +928,11 @@ function tglLong(iso) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''
 function jt1(n) { var v = (+n || 0) / 1e6, a = Math.abs(v); return (v < 0 ? '-' : '') + 'Rp ' + (a >= 1000 ? (a / 1000).toFixed(2).replace('.', ',') + ' M' : a.toFixed(1).replace('.', ',') + ' jt'); }
 function pad(n) { return (n < 10 ? '0' : '') + n; }
 function isoDay(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
-function rep(co) { return FIN.data.reports[co || FIN.co]; }
-function coName(co) { return { ASK: 'Proyek (ASK)', SK: 'Sekolah' }[co || FIN.co]; }
+// 23 Nov (founders: "SK has 4 entity ... keuangan need to seperate"): on the SK page FIN.cv picks one CV's report
+function cvOne() { return FIN_SITE === 'SK' && FIN.cv !== 'ALL' && FIN.data && FIN.data.reportsCv && FIN.data.reportsCv[FIN.cv] ? FIN.cv : ''; }
+function rep(co) { var c = co || FIN.co; return c === 'SK' && cvOne() ? FIN.data.reportsCv[FIN.cv] : FIN.data.reports[c]; }
+function coName(co) { var c = co || FIN.co; return c === 'SK' ? (cvOne() ? 'Sekolah, CV ' + FIN.cv : 'Sekolah') : { ASK: 'Proyek (ASK)' }[c]; }
+function skPart() { var s = FIN.data.sk; return cvOne() && s.byCv && s.byCv[FIN.cv] ? s.byCv[FIN.cv] : s; }
 function pct(a, b) { return b ? (Math.round(a / b * 1000) / 10).toString().replace('.', ',') + '%' : ''; }
 function sevPill(s) { return '<span class="pill ' + ({ Tinggi: 't', Sedang: 's', Rendah: 'r' }[s] || 'r') + '">' + esc(s) + '</span>'; }
 
@@ -926,6 +942,7 @@ function finPeriods() {
   for (var m = now.getMonth(); m >= 0; m--) opts.push(['m' + m, BULAN[m] + ' ' + y]);
   opts.push(['custom', 'Pilih tanggal...']);
   sel.innerHTML = opts.map(function (o) { return '<option value="' + o[0] + '">' + esc(o[1]) + '</option>'; }).join('');
+  if ($('finCv')) $('finCv').addEventListener('change', function () { FIN.cv = $('finCv').value || 'ALL'; FIN.sel = null; finRender(); });
   sel.addEventListener('change', function () {
     var v = sel.value;
     $('finCustom').hidden = v !== 'custom';
@@ -988,6 +1005,12 @@ function finTake(d) {
     var el = document.querySelector('[data-l="' + c + '"]'), v = d.reports[c].labaRugi.laba;
     if (el) { el.textContent = jt1(v); el.className = 'v num' + (v < 0 ? ' neg' : ''); el.title = 'Laba bersih periode ini'; }
   });
+  if (FIN_SITE === 'SK' && $('finCv')) {
+    var cvs = (d.sk && d.sk.cvs) || [], sel = $('finCv');
+    if (cvs.indexOf(FIN.cv) < 0) FIN.cv = 'ALL';
+    sel.innerHTML = '<option value="ALL">Semua CV' + (cvs.length ? ' (' + esc(cvs.join(', ')) + ')' : '') + '</option>' + cvs.map(function (c) { return '<option value="' + esc(c) + '"' + (FIN.cv === c ? ' selected' : '') + '>CV ' + esc(c) + '</option>'; }).join('');
+    sel.hidden = cvs.length < 2;
+  }
   COP.input = !!d.can.input; COP.viewer = d.viewer || '';
   copReady();
   finRender();
@@ -999,10 +1022,11 @@ function finRender() {
   var d = FIN.data;
   $('finTitle').textContent = TITLES[FIN.tab];
   finStamp();
-  var f = { ringkasan: vRingkasan, lr: vLabaRugi, neraca: vNeraca, arus: vArus, proyek: vProyek, bank: vBank, cek: vCek, sumber: vSumber }[FIN.tab];
+  if (FIN.tab === 'adj' && FIN_SITE !== 'SK') FIN.tab = 'ringkasan';
+  var f = { ringkasan: vRingkasan, lr: vLabaRugi, neraca: vNeraca, arus: vArus, proyek: vProyek, bank: vBank, adj: vAdj, cek: vCek, sumber: vSumber }[FIN.tab];
   $('finMain').innerHTML = '<div class="view">' + f() + '</div>';
   var mn = $('finMain'); mn.onclick = mn.oninput = mn.onchange = mn.onkeydown = null; // Perlu dicek binds these
-  var after = { ringkasan: drawRingkasan, lr: bindLR, arus: drawArus, proyek: drawProyek, bank: bindBank, cek: bindCek, sumber: bindSumber }[FIN.tab];
+  var after = { ringkasan: drawRingkasan, lr: bindLR, arus: drawArus, proyek: drawProyek, bank: bindBank, adj: bindAdj, cek: bindCek, sumber: bindSumber }[FIN.tab];
   if (after) after();
 }
 
@@ -1082,7 +1106,19 @@ function vRingkasan() {
     '<div class="stack" role="img" aria-label="Pembagian penjualan bersih"><i style="width:' + w(pokok) + '%;background:#d9dbe8"></i><i style="width:' + w(other) + '%;background:#8d90e0"></i>' + (L.laba > 0 ? '<i style="width:' + w(L.laba) + '%;background:#2728c0"></i>' : '') + '</div>' +
     '<div class="slegend"><span><i style="background:#d9dbe8"></i>Harga pokok <b>' + jt1(pokok) + '</b> (' + p100(pokok) + ')</span><span><i style="background:#8d90e0"></i>Biaya operasional dan lain <b>' + jt1(other) + '</b> (' + p100(other) + ')</span>' +
     '<span><i style="background:' + (L.laba < 0 ? '#c2410c' : '#2728c0') + '"></i>' + (L.laba < 0 ? 'Rugi' : 'Laba') + ' bersih <b>' + jt1(L.laba) + '</b> (' + p100(L.laba) + ')</span></div></div>' : '';
-  return strip + '<div class="g21">' + chartCard + pos + '</div><div class="g21">' + attn + bank + '</div>' + lr;
+  return cvNote() + strip + '<div class="g21">' + chartCard + pos + '</div><div class="g21">' + attn + bank + '</div>' + lr + luarCard();
+}
+// 23 Nov: one CV on its own, and the CV ASK invoices that are not counted on the SK page
+function cvNote() {
+  if (FIN_SITE !== 'SK') return '';
+  var s = FIN.data.sk || {}, one = cvOne();
+  if (one) return '<p class="cvnote">Hanya CV ' + esc(one) + '. Uang CV ' + esc(one) + ' yang masuk ke rekening a.n. SADYA KERSA tampil sebagai "Uang CV ini di rekening CV lain"; pilih Semua CV untuk gabungannya.</p>';
+  return (s.cvs || []).length > 1 ? '<p class="cvnote">Gabungan CV ' + esc(listId(s.cvs)) + '. Pilih satu CV di kanan atas untuk laporannya sendiri.</p>' : '';
+}
+function luarCard() {
+  var l = FIN_SITE === 'SK' && FIN.data.sk && FIN.data.sk.luar;
+  if (!l || !l.count) return '';
+  return '<div class="card"><h2>Tidak dihitung di SK</h2><p class="sub" style="margin-bottom:0">' + l.count + ' invoice di file order atas nama CV ASK (net ' + esc(rp(l.net)) + ') di periode ini. Keputusan pendiri 23 November: SK dan ASK dipisah supaya tidak ada yang terhitung dua kali; invoice ini dibukukan di ASK.</p></div>';
 }
 function listId(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' dan ' + a[a.length - 1]; }
 function mInfo(m) {
@@ -1134,19 +1170,19 @@ function selMonth(i) {
 }
 // ---------- laba rugi ----------
 function vLabaRugi() {
-  var cos = [FIN.co], R = FIN.data.reports, main = R[FIN.co].labaRugi;
+  var cos = [FIN.co], main = rep().labaRugi;
   var head = '<tr><th>Pos</th>' + cos.map(function (c) { return '<th class="n">' + esc(coName(c)) + '</th>'; }).join('') + '<th class="p">% penjualan</th></tr>';
-  var cell = function (c, key, sign) { return '<td class="n">' + rpc(R[c].labaRugi[key] * (sign || 1)) + '</td>'; };
+  var cell = function (c, key, sign) { return '<td class="n">' + rpc(rep(c).labaRugi[key] * (sign || 1)) + '</td>'; };
   var share = function (v) { return '<td class="p">' + pct(v, main.bersih) + '</td>'; };
   var group = function (lbl, key, grpKey, sign) {
     var open = FIN.open[grpKey] !== false, items = {}, ids = []; // 23 Nov (Firman missed Gaji Karyawan inside a closed row): every pos opens by default, like the Excel Laba Rugi
-    cos.forEach(function (c) { (R[c].labaRugi.items[grpKey] || []).forEach(function (x) { if (!items[x.acc]) { items[x.acc] = { name: x.name, v: {} }; ids.push(x.acc); } items[x.acc].v[c] = x.amount; }); });
+    cos.forEach(function (c) { (rep(c).labaRugi.items[grpKey] || []).forEach(function (x) { if (!items[x.acc]) { items[x.acc] = { name: x.name, v: {} }; ids.push(x.acc); } items[x.acc].v[c] = x.amount; }); });
     var row = '<tr class="grp' + (open ? ' open' : '') + '" data-g="' + grpKey + '"><td>' + (ids.length ? CHEV : '<span class="chev"></span>') + lbl + '</td>' + cos.map(function (c) { return cell(c, key, sign); }).join('') + share(main[key] * (sign || 1)) + '</tr>';
     if (open) row += ids.map(function (id) { return '<tr class="acc"><td>' + esc(items[id].name) + '</td>' + cos.map(function (c) { return '<td class="n">' + (items[id].v[c] != null ? rpc(items[id].v[c] * (sign || 1)) : '') + '</td>'; }).join('') + '<td class="p">' + pct((items[id].v[FIN.co] || 0) * (sign || 1), main.bersih) + '</td></tr>'; }).join('');
     return row;
   };
   var sum = function (lbl, key, cls) { return '<tr class="' + (cls || 'sum') + '"><td>' + lbl + '</td>' + cos.map(function (c) { return cell(c, key); }).join('') + share(main[key]) + '</tr>'; };
-  return '<div class="card"><h2>Laba rugi</h2><p class="sub">Rincian tiap pos sudah terbuka; klik nama pos untuk menutupnya. Sisi proyek dari jurnal ASK; sisi sekolah dari file order 2026 dan rekening koran.</p><div class="tw"><table><thead>' + head + '</thead><tbody>' +
+  return '<div class="card"><h2>Laba rugi</h2><p class="sub">Rincian tiap pos sudah terbuka; klik nama pos untuk menutupnya. ' + (FIN_SITE === 'ASK' ? 'Dari jurnal ASK.' : 'Dari file order 2026 (tanpa invoice CV ASK), rekening koran dan penyesuaian.') + '</p>' + cvNote() + '<div class="tw"><table><thead>' + head + '</thead><tbody>' +
     group('Penjualan', 'jual', 'jual') + group('Potongan dan pajak penjualan', 'potong', 'potong', -1) + sum('Penjualan bersih', 'bersih') +
     group('Harga pokok barang dan material', 'hpp', 'hpp', -1) + group('Biaya langsung (upah proyek, cash back, insentif)', 'langsung', 'langsung', -1) + sum('Laba kotor', 'kotor') +
     group('Biaya operasional', 'ops', 'ops', -1) + sum('Laba operasional', 'operasional') + group('Pendapatan lain', 'lainIn', 'lainin') + group('Biaya lain', 'lainOut', 'lainout', -1) +
@@ -1223,7 +1259,7 @@ function vProyek() {
         }).join('') + '</tbody></table></div>' : '<p class="sub">Belum ada data proyek: jurnal ASK belum tersambung.</p>') + '</div>';
   }
   if (FIN.co !== 'ASK') {
-    var s = d.sk, top = s.schools[0] ? s.schools[0].invoice : 1;
+    var s = skPart(), top = s.schools[0] ? s.schools[0].invoice : 1;
     h += '<div class="side2"><div class="card"><h2>Sekolah per bulan</h2><p class="sub">' + s.invoices + ' invoice di periode ini. Belum lunas: ' + s.unpaid.count + ' invoice, ' + rp(s.unpaid.net) + '.</p><div class="chart tall"><canvas id="cSek" role="img" aria-label="Subtotal dan margin sekolah per bulan"></canvas></div></div>' +
       '<div class="card"><h2>Sekolah terbesar</h2><p class="sub">Subtotal invoice di periode ini; margin = Gross Margin di file order.</p>' +
       s.schools.map(function (x) { return '<div class="gline" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px"><span style="color:var(--ink);font-weight:600">' + esc(x.school) + '</span><b>' + rp(x.invoice) + '</b></div><div class="mbar"><i style="width:' + (x.invoice / top * 100).toFixed(1) + '%"></i></div><div style="font-size:11.5px;color:var(--muted);margin-top:4px">' + x.invoices + ' invoice · margin ' + rp(x.margin) + (x.unpaid ? ' · belum dibayar ' + rp(x.unpaid) : '') + '</div></div>'; }).join('') + '</div></div>';
@@ -1232,11 +1268,70 @@ function vProyek() {
 }
 function drawProyek() {
   if (FIN.co === 'ASK') return;
-  var ms = FIN.data.sk.months;
+  var ms = skPart().months;
   chart('cSek', { data: { labels: ms.map(function (m) { return BLN[+m.month.slice(5) - 1]; }), datasets: [
     { type: 'bar', label: 'Subtotal', data: ms.map(function (m) { return m.invoice; }), backgroundColor: '#e3e5fb', hoverBackgroundColor: '#cfd2f7', borderRadius: 6, maxBarThickness: 30 },
     { type: 'line', label: 'Margin', data: ms.map(function (m) { return m.margin; }), borderColor: '#2728c0', borderWidth: 2, tension: .35, pointRadius: 2.5, pointBackgroundColor: '#2728c0' }] },
     options: { maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8, font: CHART_FONT } }, tooltip: tip() }, scales: axes() } });
+}
+
+// ---------- Penyesuaian (23 Nov, founders via Muji: "they need you to-be able to flexbel ... if founder want you to add
+// this 300k into another row, you need to able do it") ----------
+// A manual entry on the SK side for cases the files cannot show: finAddAdjust / finCancelAdjust (Finance.js, input
+// only). The list shows every one, cancelled ones greyed; the report counts the active ones at once.
+function vAdj() {
+  var a = FIN.data.adj || { list: [], presets: [], cvs: [] }, can = FIN.data.can.input, opts = FIN.data.bank.options;
+  var accOpt = function (sel) { return '<option value="">Pilih akun...</option>' + opts.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === sel ? ' selected' : '') + '>' + esc(o.name) + '</option>'; }).join(''); };
+  var p0 = a.presets[0] || {};
+  var form = !can ? '<p class="sub">Penyesuaian dicatat Wildan atau Muji (akses Keuangan input), dari sini atau lewat Copilot.</p>' :
+    '<div class="fixbox" id="adjBox" style="animation:none"><div class="fx-h"><b>Catat penyesuaian</b><span>Langsung masuk laporan SK, bisa dibatalkan.</span></div>' +
+    '<div class="fx-grid"><label class="w3"><span>Jenis</span><select id="adjPreset">' + a.presets.map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + '</option>'; }).join('') + '</select></label></div>' +
+    '<p class="adj-hint" id="adjHint">' + esc(p0.hint || '') + '</p>' +
+    '<div class="fx-grid">' +
+    '<label><span>Tanggal</span><input type="date" id="adjDate" value="' + esc(FIN.data.period.to) + '"></label>' +
+    '<label><span>CV</span><select id="adjCv">' + a.cvs.map(function (c) { return '<option value="' + esc(c) + '"' + (c === (cvOne() || 'SK') ? ' selected' : '') + '>CV ' + esc(c) + '</option>'; }).join('') + '</select></label>' +
+    '<label><span>Jumlah (Rp)</span><input type="text" id="adjAmt" inputmode="numeric" placeholder="300.000"></label>' +
+    '<label><span>Akun debet (bertambah biaya / aset)</span><select id="adjDeb">' + accOpt(p0.debit) + '</select></label>' +
+    '<label><span>Akun kredit (berkurang / sumber)</span><select id="adjKre">' + accOpt(p0.credit) + '</select></label>' +
+    '<label><span>Invoice atau baris bank</span><input type="text" id="adjRef" placeholder="INV-..."></label>' +
+    '<label class="w3"><span>Uraian (apa dan untuk siapa)</span><input type="text" id="adjDesc" placeholder="Selisih INV-...: Rp 300 rb dibayar ke ... di lokasi"></label>' +
+    '<label class="w3"><span>Alasan</span><input type="text" id="adjWhy" placeholder="Arahan Firman, 23 Nov"></label></div>' +
+    '<div class="adj-acts"><button class="btn pri" type="button" id="adjSave">Simpan penyesuaian</button><button class="btn sm" type="button" onclick="copOpen(\'Bantu saya mencatat penyesuaian untuk kasus khusus\', \'side\')">' + CHAT_IC + 'Minta Copilot</button></div><p class="msg" id="adjMsg" role="status"></p></div>';
+  var nm = function (id) { return accName(id); };
+  var rows = a.list.map(function (x) {
+    var on = /^aktif/i.test(x.status);
+    return '<tr class="' + (on ? '' : 'off') + '" data-id="' + esc(x.id) + '"><td>' + esc(tgl(x.date)) + '<div style="font-size:11px;color:var(--muted)">' + esc(x.id) + '</div></td><td>CV ' + esc(x.cv) + '</td><td>' + esc(x.desc) + (x.ref ? '<div style="font-size:11.5px;color:var(--muted)">' + esc(x.ref) + '</div>' : '') + (x.why ? '<div style="font-size:11.5px;color:var(--muted)">Alasan: ' + esc(x.why) + '</div>' : '') + '</td>' +
+      '<td>' + esc(nm(x.debit)) + '</td><td>' + esc(nm(x.credit)) + '</td><td class="n">' + rpc(x.amount) + '</td><td><span class="adj-st' + (on ? '' : ' off') + '">' + esc(on ? 'Aktif' : x.status) + '</span>' + (on && can ? '<div style="margin-top:6px"><button class="btn sm adjX" type="button">Batalkan</button></div>' : '') + '</td></tr>';
+  }).join('');
+  return '<div class="card"><h2>Penyesuaian</h2><p class="sub">Untuk kejadian nyata yang tidak tercatat otomatis: selisih invoice dan pembayaran (misalnya Rp 300 rb dibayarkan di lokasi pelanggan), biaya perusahaan dibayar pribadi pendiri, dana talangan pendiri yang sudah dijelaskan, atau pindah akun. Rekening bank tidak diubah di sini.</p>' + form + '</div>' +
+    '<div class="card"><h2>Daftar penyesuaian</h2>' + (rows ? '<div class="tw"><table><thead><tr><th>Tanggal</th><th>CV</th><th>Uraian</th><th>Debet</th><th>Kredit</th><th class="n">Jumlah</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="empty"><b>Belum ada penyesuaian</b>Semua angka masih dari file order dan rekening koran.</div>') + '</div>';
+}
+function bindAdj() {
+  var a = FIN.data.adj || { presets: [] }, pr = $('adjPreset');
+  if (pr) pr.addEventListener('change', function () {
+    var p = a.presets.filter(function (x) { return x.id === pr.value; })[0] || {};
+    $('adjHint').textContent = p.hint || ''; $('adjDeb').value = p.debit || ''; $('adjKre').value = p.credit || '';
+  });
+  var save = $('adjSave');
+  if (save) save.addEventListener('click', function () {
+    FIN.touched = true;
+    var x = { date: $('adjDate').value, cv: $('adjCv').value, amount: $('adjAmt').value, debit: $('adjDeb').value, credit: $('adjKre').value, ref: $('adjRef').value, desc: $('adjDesc').value, why: $('adjWhy').value };
+    var m = $('adjMsg');
+    save.disabled = true; save.textContent = 'Menyimpan...'; m.className = 'msg'; m.textContent = '';
+    google.script.run.withSuccessHandler(function (r) { toast('Penyesuaian ' + r.id + ' tersimpan'); finLoad(); })
+      .withFailureHandler(function (e) { save.disabled = false; save.textContent = 'Simpan penyesuaian'; m.className = 'msg err'; m.textContent = String(e && e.message || e); })
+      .finAddAdjust(x);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.adjX'), function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-sure') !== '1') { btn.setAttribute('data-sure', '1'); btn.textContent = 'Yakin batalkan?'; return; }
+      var id = btn.closest('tr').getAttribute('data-id');
+      btn.disabled = true; btn.textContent = 'Membatalkan...';
+      google.script.run.withSuccessHandler(function () { toast('Penyesuaian ' + id + ' dibatalkan'); finLoad(); })
+        .withFailureHandler(function (e) { btn.disabled = false; btn.textContent = 'Batalkan'; btn.removeAttribute('data-sure'); $('finSub').textContent = String(e && e.message || e); })
+        .finCancelAdjust(id, '');
+    });
+  });
 }
 
 // ---------- rekening koran ----------
@@ -1251,19 +1346,19 @@ function vBank() {
     '<select id="bkAcc" aria-label="Rekening">' + SITE.acc.map(function (a) { return '<option value="' + a[0] + '">' + esc(a[1]) + '</option>'; }).join('') + '</select>' +
     '<label class="btn pri" for="bkFile">Pilih PDF</label><input type="file" id="bkFile" accept="application/pdf,.pdf" hidden></div>' : '';
   var flt = { todo: function (l) { return l.status === 'Perlu dicek' || l.status === 'Perlu konfirmasi'; }, all: function () { return true; }, auto: function (l) { return l.status === 'Otomatis' || l.status === 'Dikonfirmasi'; }, ask: function (l) { return l.account === 'ASK'; } }[FIN.bankFilter];
-  var ls = b.lines.filter(flt), lastDay = '';
+  var one = cvOne(), ls = b.lines.filter(flt).filter(function (l) { return !one || l.cv === one; }), lastDay = '';
   var opt = function (sel) { return '<option value="">Pilih akun...</option>' + b.options.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === sel ? ' selected' : '') + '>' + esc(o.name) + '</option>'; }).join(''); };
   var rows = ls.map(function (l) {
     var dayH = l.date !== lastDay ? '<div class="day">' + esc(tgl(l.date)) + '</div>' : ''; lastDay = l.date;
     var edit = can && l.account === 'SK' && (l.status === 'Perlu dicek' || l.status === 'Perlu konfirmasi'), inflow = !!l.credit;
     return dayH + '<div class="tx" data-id="' + esc(l.id) + '" data-inv="' + esc(l.inv) + '"><span class="av' + (inflow ? ' in' : '') + '">' + esc(initials(l.desc)) + '</span>' +
-      '<div class="d"><b>' + esc(l.desc || 'Mutasi bank') + '</b><span>' + esc(l.time) + ' · ' + (l.account === 'ASK' ? 'Rekening ASK, dicocokkan dengan Kas Bri' : esc(accName(l.acc))) + (l.note ? ' · ' + esc(l.note) : '') + '</span></div>' +
+      '<div class="d"><b>' + esc(l.desc || 'Mutasi bank') + (l.account === 'SK' && l.cv && l.cv !== 'SK' ? '<span class="cvtag">CV ' + esc(l.cv) + '</span>' : '') + (l.pendiri ? '<span class="cvtag" style="background:#fff1ea;color:var(--accent)">Talangan pendiri?</span>' : '') + '</b><span>' + esc(l.time) + ' · ' + (l.account === 'ASK' ? 'Rekening ASK, dicocokkan dengan Kas Bri' : esc(accName(l.acc))) + (l.note ? ' · ' + esc(l.note) : '') + '</span></div>' +
       '<div class="a' + (inflow ? ' in' : '') + '">' + (inflow ? '+' + rp(l.credit) : '-' + rp(l.debit)) + '<div style="margin-top:4px">' + statusPill(l.status) + '</div></div>' +
-      (edit ? '<div class="edit"><select class="bkSel" aria-label="Akun untuk baris ini">' + opt(l.acc) + '</select><button class="btn bkOk" type="button">Konfirmasi</button></div>' : '') + '</div>';
+      (edit ? '<div class="edit"><select class="bkSel" aria-label="Akun untuk baris ini">' + opt(l.acc) + '</select>' + (FIN_SITE === 'SK' ? '<select class="bkCv" aria-label="CV untuk baris ini" style="flex:0 0 auto;min-width:120px">' + ['', 'SK', 'SL', 'RS', 'TS'].map(function (c) { return '<option value="' + c + '"' + (c === (l.cvSet || '') ? ' selected' : '') + '>' + (c ? 'CV ' + c : 'CV ikut invoice') + '</option>'; }).join('') + '</select>' : '') + '<button class="btn bkOk" type="button">Konfirmasi</button></div>' : '') + '</div>';
   }).join('');
   var chips = !SITE.chips.length ? '' : '<div class="chips" id="bkChips">' + SITE.chips.map(function (c) { return '<button type="button" data-v="' + c[0] + '" aria-pressed="' + (FIN.bankFilter === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div>';
   return '<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">' + st + '</div>' + up +
-    '<div class="card"><h2>Mutasi</h2><p class="sub">Uang masuk yang nilainya sama dengan Net satu invoice dicocokkan otomatis. Transfer ke Firman dianggap membayar barang sampai dikonfirmasi lain.' + (can ? '' : ' Pengisian akun dilakukan Wildan.') + '</p>' + chips +
+    '<div class="card"><h2>Mutasi</h2><p class="sub">Uang masuk yang nilainya sama dengan Net satu invoice dicocokkan otomatis. Transfer ke rekening pribadi pendiri dicatat sebagai dana talangan sampai Wildan menjelaskan dipakai untuk apa. Rekening ini milik CV SK; uang CV lain di dalamnya dicatat antar CV.' + (can ? '' : ' Pengisian akun dilakukan Wildan.') + '</p>' + chips +
     (rows || '<div class="empty"><b>Tidak ada mutasi di pilihan ini</b>' + (FIN.bankFilter === 'todo' ? 'Semua baris sudah punya akun.' : '') + '</div>') +
     (b.total > b.lines.length ? '<p class="sub" style="margin-top:12px">Menampilkan ' + b.lines.length + ' baris terbaru dari ' + b.total + '.</p>' : '') + '</div>';
 }
@@ -1279,11 +1374,11 @@ function bindBank() {
   }
   Array.prototype.forEach.call(document.querySelectorAll('.bkOk'), function (btn) {
     btn.addEventListener('click', function () {
-      var tx = btn.closest('.tx'), sel = tx.querySelector('.bkSel'), acc = sel.value;
+      var tx = btn.closest('.tx'), sel = tx.querySelector('.bkSel'), acc = sel.value, cvSel = tx.querySelector('.bkCv');
       if (!acc) { sel.focus(); return; }
       btn.disabled = true; btn.textContent = 'Menyimpan...';
       google.script.run.withSuccessHandler(function () { finLoad(); }).withFailureHandler(function (e) { btn.disabled = false; btn.textContent = 'Konfirmasi'; $('finSub').textContent = e.message; })
-        .finSetBankLine(tx.getAttribute('data-id'), acc, /^SK:(119|121)$/.test(acc) ? tx.getAttribute('data-inv') : '', '');
+        .finSetBankLine(tx.getAttribute('data-id'), acc, /^SK:(119|121)$/.test(acc) ? tx.getAttribute('data-inv') : '', '', cvSel ? cvSel.value : '');
     });
   });
 }
@@ -1568,7 +1663,7 @@ function vSumber() {
   var bankN = FIN.data.bank.lines.length; // P40: this company's lines only
   var ask = FIN_SITE !== 'ASK' ? '' : src(!!s.ask, 'Jurnal ASK (proyek)', s.ask ? 'Tersambung ke <a href="' + esc(s.ask.url) + '" target="_blank" rel="noopener">' + esc(s.ask.name) + '</a>: ' + s.ask.lines + ' baris jurnal, transaksi terakhir ' + esc(tgl(s.ask.last)) + '. Jurnal diisi di Google Sheet ini.' : esc(s.askError || 'Belum tersambung.')) +
     (can ? '<div class="card"><h2>Ganti jurnal ASK</h2><p class="sub">Hanya bila jurnal pindah ke Google Sheet lain. Tempel link Sheet-nya; tab Kode Akun, Jurnal Umum dan Daftar Proyek harus ada.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="askUrl" placeholder="https://docs.google.com/spreadsheets/d/..." aria-label="Link Google Sheet jurnal ASK" style="flex:1;min-width:240px"><button class="btn pri" type="button" id="askGo">Sambungkan</button></div><p class="msg" id="askMsg" role="status"></p></div>' : '');
-  return ask + (FIN_SITE !== 'SK' ? '' : src(true, 'File order 2026 (sekolah)', s.order.invoices + ' invoice dari data dashboard, terakhir ' + esc(tgl(s.order.last)) + '. Subtotal = penjualan; PPN dan PPh = potongan; HPP; cash back, CB marketing dan insentif = biaya langsung; Tgl Bayar = pelunasan.')) +
+  return ask + (FIN_SITE !== 'SK' ? '' : src(true, 'File order 2026 (sekolah)', s.order.invoices + ' invoice dari data dashboard (CV SK, SL, RS dan TS; invoice CV ASK tidak dihitung di sini), terakhir ' + esc(tgl(s.order.last)) + '. Subtotal = penjualan; PPN dan PPh = potongan; HPP; cash back, CB marketing dan insentif = biaya langsung; Tgl Bayar = pelunasan.')) +
     src(bankN > 0, 'Rekening koran', bankN ? bankN + ' baris tersimpan. Tambah lewat Rekening koran.' : 'Belum ada. Upload PDF BRI di bagian Rekening koran.') +
     src(true, 'Siapa bisa apa', 'Diatur di tab Akses Dashboard, kolom Tab. "Keuangan" = melihat laporan (para pendiri). "Keuangan input" = juga mengisi: upload rekening koran, memilih akun, mengganti jurnal (Wildan dan Muji).');
 }
