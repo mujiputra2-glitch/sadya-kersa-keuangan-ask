@@ -1139,14 +1139,14 @@ function vLabaRugi() {
   var cell = function (c, key, sign) { return '<td class="n">' + rpc(R[c].labaRugi[key] * (sign || 1)) + '</td>'; };
   var share = function (v) { return '<td class="p">' + pct(v, main.bersih) + '</td>'; };
   var group = function (lbl, key, grpKey, sign) {
-    var open = !!FIN.open[grpKey], items = {}, ids = [];
+    var open = FIN.open[grpKey] !== false, items = {}, ids = []; // 23 Nov (Firman missed Gaji Karyawan inside a closed row): every pos opens by default, like the Excel Laba Rugi
     cos.forEach(function (c) { (R[c].labaRugi.items[grpKey] || []).forEach(function (x) { if (!items[x.acc]) { items[x.acc] = { name: x.name, v: {} }; ids.push(x.acc); } items[x.acc].v[c] = x.amount; }); });
     var row = '<tr class="grp' + (open ? ' open' : '') + '" data-g="' + grpKey + '"><td>' + (ids.length ? CHEV : '<span class="chev"></span>') + lbl + '</td>' + cos.map(function (c) { return cell(c, key, sign); }).join('') + share(main[key] * (sign || 1)) + '</tr>';
     if (open) row += ids.map(function (id) { return '<tr class="acc"><td>' + esc(items[id].name) + '</td>' + cos.map(function (c) { return '<td class="n">' + (items[id].v[c] != null ? rpc(items[id].v[c] * (sign || 1)) : '') + '</td>'; }).join('') + '<td class="p">' + pct((items[id].v[FIN.co] || 0) * (sign || 1), main.bersih) + '</td></tr>'; }).join('');
     return row;
   };
   var sum = function (lbl, key, cls) { return '<tr class="' + (cls || 'sum') + '"><td>' + lbl + '</td>' + cos.map(function (c) { return cell(c, key); }).join('') + share(main[key]) + '</tr>'; };
-  return '<div class="card"><h2>Laba rugi</h2><p class="sub">Klik baris untuk melihat akunnya. Sisi proyek dari jurnal ASK; sisi sekolah dari file order 2026 dan rekening koran.</p><div class="tw"><table><thead>' + head + '</thead><tbody>' +
+  return '<div class="card"><h2>Laba rugi</h2><p class="sub">Rincian tiap pos sudah terbuka; klik nama pos untuk menutupnya. Sisi proyek dari jurnal ASK; sisi sekolah dari file order 2026 dan rekening koran.</p><div class="tw"><table><thead>' + head + '</thead><tbody>' +
     group('Penjualan', 'jual', 'jual') + group('Potongan dan pajak penjualan', 'potong', 'potong', -1) + sum('Penjualan bersih', 'bersih') +
     group('Harga pokok barang dan material', 'hpp', 'hpp', -1) + group('Biaya langsung (upah proyek, cash back, insentif)', 'langsung', 'langsung', -1) + sum('Laba kotor', 'kotor') +
     group('Biaya operasional', 'ops', 'ops', -1) + sum('Laba operasional', 'operasional') + group('Pendapatan lain', 'lainIn', 'lainin') + group('Biaya lain', 'lainOut', 'lainout', -1) +
@@ -1154,7 +1154,7 @@ function vLabaRugi() {
 }
 function bindLR() {
   Array.prototype.forEach.call(document.querySelectorAll('tr.grp'), function (tr) {
-    tr.addEventListener('click', function () { var g = tr.getAttribute('data-g'); FIN.open[g] = !FIN.open[g]; finRender(); });
+    tr.addEventListener('click', function () { var g = tr.getAttribute('data-g'); FIN.open[g] = FIN.open[g] === false; finRender(); });
   });
 }
 
