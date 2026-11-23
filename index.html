@@ -1106,19 +1106,14 @@ function vRingkasan() {
     '<div class="stack" role="img" aria-label="Pembagian penjualan bersih"><i style="width:' + w(pokok) + '%;background:#d9dbe8"></i><i style="width:' + w(other) + '%;background:#8d90e0"></i>' + (L.laba > 0 ? '<i style="width:' + w(L.laba) + '%;background:#2728c0"></i>' : '') + '</div>' +
     '<div class="slegend"><span><i style="background:#d9dbe8"></i>Harga pokok <b>' + jt1(pokok) + '</b> (' + p100(pokok) + ')</span><span><i style="background:#8d90e0"></i>Biaya operasional dan lain <b>' + jt1(other) + '</b> (' + p100(other) + ')</span>' +
     '<span><i style="background:' + (L.laba < 0 ? '#c2410c' : '#2728c0') + '"></i>' + (L.laba < 0 ? 'Rugi' : 'Laba') + ' bersih <b>' + jt1(L.laba) + '</b> (' + p100(L.laba) + ')</span></div></div>' : '';
-  return cvNote() + strip + '<div class="g21">' + chartCard + pos + '</div><div class="g21">' + attn + bank + '</div>' + lr + luarCard();
+  return cvNote() + strip + '<div class="g21">' + chartCard + pos + '</div><div class="g21">' + attn + bank + '</div>' + lr;
 }
-// 23 Nov: one CV on its own, and the CV ASK invoices that are not counted on the SK page
+// 23 Nov: one CV on its own, or the CVs together
 function cvNote() {
   if (FIN_SITE !== 'SK') return '';
   var s = FIN.data.sk || {}, one = cvOne();
   if (one) return '<p class="cvnote">Hanya CV ' + esc(one) + '. Uang CV ' + esc(one) + ' yang masuk ke rekening a.n. SADYA KERSA tampil sebagai "Uang CV ini di rekening CV lain"; pilih Semua CV untuk gabungannya.</p>';
   return (s.cvs || []).length > 1 ? '<p class="cvnote">Gabungan CV ' + esc(listId(s.cvs)) + '. Pilih satu CV di kanan atas untuk laporannya sendiri.</p>' : '';
-}
-function luarCard() {
-  var l = FIN_SITE === 'SK' && FIN.data.sk && FIN.data.sk.luar;
-  if (!l || !l.count) return '';
-  return '<div class="card"><h2>Tidak dihitung di SK</h2><p class="sub" style="margin-bottom:0">' + l.count + ' invoice di file order atas nama CV ASK (net ' + esc(rp(l.net)) + ') di periode ini. Keputusan pendiri 23 November: SK dan ASK dipisah supaya tidak ada yang terhitung dua kali; invoice ini dibukukan di ASK.</p></div>';
 }
 function listId(a) { return a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' dan ' + a[a.length - 1]; }
 function mInfo(m) {
@@ -1182,7 +1177,7 @@ function vLabaRugi() {
     return row;
   };
   var sum = function (lbl, key, cls) { return '<tr class="' + (cls || 'sum') + '"><td>' + lbl + '</td>' + cos.map(function (c) { return cell(c, key); }).join('') + share(main[key]) + '</tr>'; };
-  return '<div class="card"><h2>Laba rugi</h2><p class="sub">Rincian tiap pos sudah terbuka; klik nama pos untuk menutupnya. ' + (FIN_SITE === 'ASK' ? 'Dari jurnal ASK.' : 'Dari file order 2026 (tanpa invoice CV ASK), rekening koran dan penyesuaian.') + '</p>' + cvNote() + '<div class="tw"><table><thead>' + head + '</thead><tbody>' +
+  return '<div class="card"><h2>Laba rugi</h2><p class="sub">Rincian tiap pos sudah terbuka; klik nama pos untuk menutupnya. ' + (FIN_SITE === 'ASK' ? 'Dari jurnal ASK.' : 'Dari file order 2026 (semua CV), rekening koran dan penyesuaian. Jurnal ASK ada di halaman ASK.') + '</p>' + cvNote() + '<div class="tw"><table><thead>' + head + '</thead><tbody>' +
     group('Penjualan', 'jual', 'jual') + group('Potongan dan pajak penjualan', 'potong', 'potong', -1) + sum('Penjualan bersih', 'bersih') +
     group('Harga pokok barang dan material', 'hpp', 'hpp', -1) + group('Biaya langsung (upah proyek, cash back, insentif)', 'langsung', 'langsung', -1) + sum('Laba kotor', 'kotor') +
     group('Biaya operasional', 'ops', 'ops', -1) + sum('Laba operasional', 'operasional') + group('Pendapatan lain', 'lainIn', 'lainin') + group('Biaya lain', 'lainOut', 'lainout', -1) +
@@ -1354,7 +1349,7 @@ function vBank() {
     return dayH + '<div class="tx" data-id="' + esc(l.id) + '" data-inv="' + esc(l.inv) + '"><span class="av' + (inflow ? ' in' : '') + '">' + esc(initials(l.desc)) + '</span>' +
       '<div class="d"><b>' + esc(l.desc || 'Mutasi bank') + (l.account === 'SK' && l.cv && l.cv !== 'SK' ? '<span class="cvtag">CV ' + esc(l.cv) + '</span>' : '') + (l.pendiri ? '<span class="cvtag" style="background:#fff1ea;color:var(--accent)">Talangan pendiri?</span>' : '') + '</b><span>' + esc(l.time) + ' · ' + (l.account === 'ASK' ? 'Rekening ASK, dicocokkan dengan Kas Bri' : esc(accName(l.acc))) + (l.note ? ' · ' + esc(l.note) : '') + '</span></div>' +
       '<div class="a' + (inflow ? ' in' : '') + '">' + (inflow ? '+' + rp(l.credit) : '-' + rp(l.debit)) + '<div style="margin-top:4px">' + statusPill(l.status) + '</div></div>' +
-      (edit ? '<div class="edit"><select class="bkSel" aria-label="Akun untuk baris ini">' + opt(l.acc) + '</select>' + (FIN_SITE === 'SK' ? '<select class="bkCv" aria-label="CV untuk baris ini" style="flex:0 0 auto;min-width:120px">' + ['', 'SK', 'SL', 'RS', 'TS'].map(function (c) { return '<option value="' + c + '"' + (c === (l.cvSet || '') ? ' selected' : '') + '>' + (c ? 'CV ' + c : 'CV ikut invoice') + '</option>'; }).join('') + '</select>' : '') + '<button class="btn bkOk" type="button">Konfirmasi</button></div>' : '') + '</div>';
+      (edit ? '<div class="edit"><select class="bkSel" aria-label="Akun untuk baris ini">' + opt(l.acc) + '</select>' + (FIN_SITE === 'SK' ? '<select class="bkCv" aria-label="CV untuk baris ini" style="flex:0 0 auto;min-width:120px">' + ['', 'SK', 'SL', 'ASK', 'RS', 'TS'].map(function (c) { return '<option value="' + c + '"' + (c === (l.cvSet || '') ? ' selected' : '') + '>' + (c ? 'CV ' + c : 'CV ikut invoice') + '</option>'; }).join('') + '</select>' : '') + '<button class="btn bkOk" type="button">Konfirmasi</button></div>' : '') + '</div>';
   }).join('');
   var chips = !SITE.chips.length ? '' : '<div class="chips" id="bkChips">' + SITE.chips.map(function (c) { return '<button type="button" data-v="' + c[0] + '" aria-pressed="' + (FIN.bankFilter === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div>';
   return '<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">' + st + '</div>' + up +
@@ -1663,7 +1658,7 @@ function vSumber() {
   var bankN = FIN.data.bank.lines.length; // P40: this company's lines only
   var ask = FIN_SITE !== 'ASK' ? '' : src(!!s.ask, 'Jurnal ASK (proyek)', s.ask ? 'Tersambung ke <a href="' + esc(s.ask.url) + '" target="_blank" rel="noopener">' + esc(s.ask.name) + '</a>: ' + s.ask.lines + ' baris jurnal, transaksi terakhir ' + esc(tgl(s.ask.last)) + '. Jurnal diisi di Google Sheet ini.' : esc(s.askError || 'Belum tersambung.')) +
     (can ? '<div class="card"><h2>Ganti jurnal ASK</h2><p class="sub">Hanya bila jurnal pindah ke Google Sheet lain. Tempel link Sheet-nya; tab Kode Akun, Jurnal Umum dan Daftar Proyek harus ada.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" id="askUrl" placeholder="https://docs.google.com/spreadsheets/d/..." aria-label="Link Google Sheet jurnal ASK" style="flex:1;min-width:240px"><button class="btn pri" type="button" id="askGo">Sambungkan</button></div><p class="msg" id="askMsg" role="status"></p></div>' : '');
-  return ask + (FIN_SITE !== 'SK' ? '' : src(true, 'File order 2026 (sekolah)', s.order.invoices + ' invoice dari data dashboard (CV SK, SL, RS dan TS; invoice CV ASK tidak dihitung di sini), terakhir ' + esc(tgl(s.order.last)) + '. Subtotal = penjualan; PPN dan PPh = potongan; HPP; cash back, CB marketing dan insentif = biaya langsung; Tgl Bayar = pelunasan.')) +
+  return ask + (FIN_SITE !== 'SK' ? '' : src(true, 'File order 2026 (sekolah)', s.order.invoices + ' invoice dari data dashboard (semua CV di kolom CV: SK, SL, ASK, RS, TS; jurnal ASK ada di halaman ASK), terakhir ' + esc(tgl(s.order.last)) + '. Subtotal = penjualan; PPN dan PPh = potongan; HPP; cash back, CB marketing dan insentif = biaya langsung; Tgl Bayar = pelunasan.')) +
     src(bankN > 0, 'Rekening koran', bankN ? bankN + ' baris tersimpan. Tambah lewat Rekening koran.' : 'Belum ada. Upload PDF BRI di bagian Rekening koran.') +
     src(true, 'Siapa bisa apa', 'Diatur di tab Akses Dashboard, kolom Tab. "Keuangan" = melihat laporan (para pendiri). "Keuangan input" = juga mengisi: upload rekening koran, memilih akun, mengganti jurnal (Wildan dan Muji).');
 }
