@@ -632,6 +632,12 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
 .tal-p{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}.tal-p li{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--ink2)}.tal-p li span{flex:1;min-width:0}.tal-p li b{white-space:nowrap}
 .tal-f{margin-top:10px}
 @media (max-width:600px){.tal{grid-column:1 / -1}.tal-p li{flex-wrap:wrap}.fx-grid label.w2{grid-column:1 / -1}}
+/* 24 Nov (P52): the printable report */
+.lap-act{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:14px}
+.lap-h{display:flex;flex-direction:column;gap:2px;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:14px}.lap-h b{font-size:18px}.lap-h small{color:var(--muted)}
+.lap h3{font-size:14px;margin:18px 0 8px}.calk{font-size:13px;line-height:1.55;color:var(--ink2)}.calk ul{margin:4px 0 8px 18px;padding:0}
+.lap-ttd{display:flex;gap:40px;margin-top:28px;font-size:13px}.lap-ttd div{min-width:160px;border-top:1px solid var(--line2);padding-top:6px}
+@media print{.no-print,.ttl,.per,#finNav{display:none!important}.lap{box-shadow:none;border:0}.content{padding:0}}
 </style>
 </head>
 <body>
@@ -669,6 +675,9 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
         <button type="button" role="tab" data-tab="proyek" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V8l7-4 7 4v9"/><path d="M8 17v-5h4v5"/></svg><span id="finProyekTab">Proyek dan sekolah</span></button>
         <button type="button" role="tab" data-tab="bank" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="15" height="11" rx="2"/><path d="M2.5 9h15M6 13h3"/></svg><span>Rekening koran</span></button>
         <button type="button" role="tab" data-tab="adj" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h12M4 10h7M4 14.5h5"/><path d="M15 11.5v6M12 14.5h6"/></svg><span>Penyesuaian</span></button>
+        <button type="button" role="tab" data-tab="vendor" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 10 4l7 3.5v8L10 19l-7-3.5z"/><path d="M3 7.5 10 11l7-3.5M10 11v8"/></svg><span>Vendor</span></button>
+        <button type="button" role="tab" data-tab="patuh" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5 16.5 5v5c0 4-2.8 6.6-6.5 7.5C6.3 16.6 3.5 14 3.5 10V5z"/><path d="m7 10 2 2 4-4"/></svg><span>Kepatuhan</span></button>
+        <button type="button" role="tab" data-tab="laporan" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 2.5h6l3.5 3.5v11.5h-9.5z"/><path d="M11.5 2.5V6H15M8 10h5M8 13h5"/></svg><span>Laporan</span></button>
         <button type="button" role="tab" data-tab="tutup" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="8.5" rx="1.8"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><span>Tutup buku</span></button>
         <button type="button" role="tab" data-tab="cek" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 17.5 16.5h-15L10 3.5z"/><path d="M10 9v3M10 14.3v.2"/></svg><span>Perlu dicek</span><span class="cnt" id="finBadge" hidden></span></button>
         <button type="button" role="tab" data-tab="sumber" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5" rx="6" ry="2.3"/><path d="M4 5v10c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V5M4 10c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3"/></svg><span>Sumber data</span></button>
@@ -889,7 +898,7 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
 var FIN_SITE = 'ASK', FIN_ASSETS = '/assets/';
 var SITE = {
   SK: { brand: 'Sadya Kersa', sub: 'Keuangan sekolah (semua CV)', title: 'Keuangan Sadya Kersa (sekolah)', tab: 'Sekolah', load: 'Membaca file order 2026 dan rekening koran sekolah.', dash: true,
-    chips: [['todo', 'Perlu tindakan'], ['tal', 'Talangan pendiri'], ['auto', 'Sudah cocok'], ['all', 'Semua']], acc: [['SK', 'BRI a.n. SADYA KERSA (sekolah)']] },
+    chips: [['todo', 'Perlu tindakan'], ['sip', 'SIPLah belum ketemu'], ['tal', 'Talangan pendiri'], ['auto', 'Sudah cocok'], ['all', 'Semua']], acc: [['SK', 'BRI a.n. SADYA KERSA (sekolah)']] },
   ASK: { brand: 'Amanah Sadya Kersa', sub: 'Keuangan ASK (proyek)', title: 'Keuangan Amanah Sadya Kersa (ASK)', tab: 'Proyek', load: 'Membaca jurnal ASK dan rekening koran ASK.', dash: false,
     chips: [], acc: [['ASK', 'BRI ASK (pembanding Kas Bri)']] }
 }[FIN_SITE];
@@ -912,13 +921,13 @@ function finSiteUi() {
   $('finProyekTab').textContent = SITE.tab; TITLES.proyek = SITE.tab;
   if (!SITE.dash) $('finDash').remove();
   // 23 Nov: the four CVs and Penyesuaian are the SK side's only
-  if (FIN_SITE !== 'SK') { ['adj', 'tutup'].forEach(function (t) { var at = document.querySelector('#finNav [data-tab="' + t + '"]'); if (at) at.remove(); }); $('finCv').remove(); }
+  if (FIN_SITE !== 'SK') { ['adj', 'vendor', 'patuh', 'laporan', 'tutup'].forEach(function (t) { var at = document.querySelector('#finNav [data-tab="' + t + '"]'); if (at) at.remove(); }); $('finCv').remove(); }
   if ($('finLoadTxt')) $('finLoadTxt').textContent = SITE.load;
   Array.prototype.forEach.call(document.querySelectorAll('#finCo button'), function (b) { if (b.getAttribute('data-co') !== FIN_SITE) b.remove(); else b.setAttribute('aria-pressed', 'true'); });
 }
 var BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 var BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-var TITLES = { ringkasan: 'Ringkasan', lr: 'Laba rugi', neraca: 'Neraca', arus: 'Arus kas', proyek: 'Proyek dan sekolah', bank: 'Rekening koran', adj: 'Penyesuaian', tutup: 'Tutup buku', cek: 'Perlu dicek', sumber: 'Sumber data' };
+var TITLES = { ringkasan: 'Ringkasan', lr: 'Laba rugi', neraca: 'Neraca', arus: 'Arus kas', proyek: 'Proyek dan sekolah', bank: 'Rekening koran', adj: 'Penyesuaian', vendor: 'Tagihan vendor', patuh: 'Kepatuhan', laporan: 'Laporan', tutup: 'Tutup buku', cek: 'Perlu dicek', sumber: 'Sumber data' };
 var CHAT_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9l-4 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z"/></svg>';
 var CHEV = '<svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 2.5 8 6l-3.5 3.5"/></svg>';
 var OK_IC = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M5.3 8.2 7.2 10l3.5-4"/></svg>';
@@ -1030,11 +1039,11 @@ function finRender() {
   var d = FIN.data;
   $('finTitle').textContent = TITLES[FIN.tab];
   finStamp();
-  if ((FIN.tab === 'adj' || FIN.tab === 'tutup') && FIN_SITE !== 'SK') FIN.tab = 'ringkasan';
-  var f = { ringkasan: vRingkasan, lr: vLabaRugi, neraca: vNeraca, arus: vArus, proyek: vProyek, bank: vBank, adj: vAdj, tutup: vTutup, cek: vCek, sumber: vSumber }[FIN.tab];
+  if (['adj', 'vendor', 'patuh', 'laporan', 'tutup'].indexOf(FIN.tab) >= 0 && FIN_SITE !== 'SK') FIN.tab = 'ringkasan';
+  var f = { ringkasan: vRingkasan, lr: vLabaRugi, neraca: vNeraca, arus: vArus, proyek: vProyek, bank: vBank, adj: vAdj, vendor: vVendor, patuh: vPatuh, laporan: vLaporan, tutup: vTutup, cek: vCek, sumber: vSumber }[FIN.tab];
   $('finMain').innerHTML = '<div class="view">' + f() + '</div>';
   var mn = $('finMain'); mn.onclick = mn.oninput = mn.onchange = mn.onkeydown = null; // Perlu dicek binds these
-  var after = { ringkasan: drawRingkasan, lr: bindLR, arus: drawArus, proyek: drawProyek, bank: bindBank, adj: bindAdj, tutup: bindTutup, cek: bindCek, sumber: bindSumber }[FIN.tab];
+  var after = { ringkasan: drawRingkasan, lr: bindLR, arus: drawArus, proyek: drawProyek, bank: bindBank, adj: bindAdj, vendor: bindVendor, patuh: bindPatuh, laporan: bindLaporan, tutup: bindTutup, cek: bindCek, sumber: bindSumber }[FIN.tab];
   if (after) after();
 }
 
@@ -1393,6 +1402,135 @@ function bindAdj() {
   });
 }
 
+// ---------- tagihan vendor (24 Nov, P52) ----------
+function mut2(x, c) { return '<div style="font-size:11.5px;color:' + (c || 'var(--muted)') + ';margin-top:2px">' + x + '</div>'; }
+function vVendor() {
+  var v = FIN.data.vendor || { list: [], ember: {}, vendor: [] }, can = FIN.data.can.input, cvs = (FIN.data.adj && FIN.data.adj.cvs) || ['SK'], one = cvOne();
+  var ls = v.list.filter(function (b) { return !one || b.cv === one; });
+  var kpi = function (t, val, sub) { return '<div class="kpi"><span class="eyebrow">' + t + '</span><b class="num">' + val + '</b><small>' + sub + '</small></div>'; };
+  var form = !can ? '' : '<div class="fixbox" id="vdBox" style="animation:none"><div class="fx-h"><b>Catat tagihan vendor</b><span>Satu tagihan per nota atau faktur dari pemasok.</span></div><div class="fx-grid">' +
+    '<label><span>Tanggal tagihan</span><input type="date" id="vdDate" value="' + esc(FIN.data.period.to) + '"></label>' +
+    '<label><span>CV</span><select id="vdCv">' + cvs.map(function (c) { return '<option value="' + esc(c) + '"' + (c === (one || 'SK') ? ' selected' : '') + '>CV ' + esc(c) + '</option>'; }).join('') + '</select></label>' +
+    '<label><span>Vendor</span><input type="text" id="vdVendor" placeholder="Toko / CV pemasok"></label>' +
+    '<label><span>No. tagihan</span><input type="text" id="vdNo" placeholder="Nota 0123"></label>' +
+    '<label><span>Invoice order (kalau satu order)</span><input type="text" id="vdInv" placeholder="INV-..."></label>' +
+    '<label><span>Jumlah tagihan (Rp)</span><input type="text" id="vdAmt" inputmode="numeric" placeholder="12.500.000"></label>' +
+    '<label><span>PPN masukan (Rp)</span><input type="text" id="vdPpn" inputmode="numeric" placeholder="0 kalau bukan PKP"></label>' +
+    '<label><span>No. faktur pajak</span><input type="text" id="vdFaktur" placeholder="kalau ada PPN"></label>' +
+    '<label><span>Jatuh tempo</span><input type="date" id="vdDue"></label>' +
+    '<label class="w2"><span>Bukti (no. nota, link foto)</span><input type="text" id="vdBukti" placeholder="link Drive / nomor nota"></label>' +
+    '<label><span>HPP di file order termasuk PPN?</span><select id="vdHpp"><option value="">Tidak / tidak tahu</option><option value="1">Ya: pindahkan PPN masukan ke kredit pajak</option></select></label></div>' +
+    '<div class="adj-acts"><button class="btn pri" type="button" id="vdSave">Simpan tagihan</button></div><p class="msg" id="vdMsg" role="status"></p></div>';
+  var rows = ls.map(function (b) {
+    var pill = b.status === 'Lunas' ? 'ok' : b.status === 'Sebagian' ? 's' : b.umur > 30 ? 't' : 'r';
+    return '<tr data-id="' + esc(b.id) + '"><td>' + esc(tgl(b.date)) + mut2(esc(b.id)) + '</td><td><b style="font-weight:600">' + esc(b.vendor) + '</b>' + mut2(esc([b.no, b.inv, b.faktur ? 'faktur ' + b.faktur : '', b.bukti ? 'bukti ' + b.bukti : ''].filter(String).join(' · '))) + '</td><td>CV ' + esc(b.cv) + '</td>' +
+      '<td class="n">' + rpc(b.amount) + (b.ppn ? mut2('PPN ' + rp(b.ppn)) : '') + '</td><td class="n">' + rpc(b.dibayar) + '</td><td class="n">' + rpc(b.sisa) + '</td><td><span class="pill ' + pill + '">' + esc(b.status) + '</span>' + (b.sisa > 1 && b.umur > 0 ? mut2(b.umur + ' hari') : '') +
+      (can ? '<div style="margin-top:6px"><button class="btn sm vdX" type="button">Batalkan</button></div>' : '') + '</td></tr>';
+  }).join('');
+  var e = v.ember || {};
+  return '<div class="kpis" style="margin-top:0">' + kpi('Tagihan belum dibayar', rp(v.terbuka || 0), (v.list || []).filter(function (b) { return b.sisa > 1; }).length + ' tagihan') +
+    kpi('Lewat 30 hari', rp((e.d60 || 0) + (e.lebih || 0)), 'lebih dari 60 hari ' + rp(e.lebih || 0)) + kpi('HPP tanpa tagihan', rp(v.tanpaTagihan || 0), 'hutang pembelian di buku yang belum ada notanya') + kpi('PPN masukan tercatat', rp(v.ppnMasukan || 0), 'dari faktur pemasok PKP') + '</div>' +
+    '<div class="card"><h2>Tagihan vendor</h2><p class="sub">HPP sudah tercatat dari file order (Hutang pembelian). Tagihan vendor menjelaskan hutang itu: ke siapa, nota apa, faktur pajaknya, kapan jatuh tempo. Pembayaran tercatat lewat Rekening koran (akun Hutang pembelian, pilih tagihannya) atau Rincian dana talangan (pilih tagihannya).</p>' + form + '</div>' +
+    '<div class="card"><h2>Daftar tagihan</h2>' + (rows ? '<div class="tw"><table><thead><tr><th>Tanggal</th><th>Vendor</th><th>CV</th><th class="n">Jumlah</th><th class="n">Dibayar</th><th class="n">Sisa</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div>' :
+      '<div class="empty"><b>Belum ada tagihan vendor</b>Hutang pembelian ' + rp(v.tanpaTagihan || 0) + ' di buku belum punya nota satu pun.</div>') +
+    (v.vendor && v.vendor.length ? '<p class="sub" style="margin-top:12px">Sisa terbesar: ' + v.vendor.slice(0, 5).map(function (x) { return esc(x.vendor) + ' ' + rp(x.sisa); }).join(', ') + '.</p>' : '') + '</div>';
+}
+function bindVendor() {
+  var sv = $('vdSave');
+  if (sv) sv.addEventListener('click', function () {
+    FIN.touched = true;
+    var x = { date: $('vdDate').value, cv: $('vdCv').value, vendor: $('vdVendor').value, no: $('vdNo').value, inv: $('vdInv').value, amount: $('vdAmt').value, ppn: $('vdPpn').value, faktur: $('vdFaktur').value, due: $('vdDue').value, bukti: $('vdBukti').value, hppPpn: $('vdHpp').value === '1' }, m = $('vdMsg');
+    sv.disabled = true; sv.textContent = 'Menyimpan...'; m.className = 'msg'; m.textContent = '';
+    google.script.run.withSuccessHandler(function (r) { toast('Tagihan ' + r.id + ' tersimpan'); finLoad(); })
+      .withFailureHandler(function (e) { sv.disabled = false; sv.textContent = 'Simpan tagihan'; m.className = 'msg err'; m.textContent = String(e && e.message || e); })
+      .finAddVendor(x);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.vdX'), function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-sure') !== '1') { btn.setAttribute('data-sure', '1'); btn.textContent = 'Yakin batalkan?'; return; }
+      var id = btn.closest('tr').getAttribute('data-id');
+      btn.disabled = true; btn.textContent = 'Membatalkan...';
+      google.script.run.withSuccessHandler(function () { toast('Tagihan ' + id + ' dibatalkan'); finLoad(); })
+        .withFailureHandler(function (e) { btn.disabled = false; btn.textContent = 'Batalkan'; btn.removeAttribute('data-sure'); $('finSub').textContent = String(e && e.message || e); })
+        .finCancelVendor(id, '');
+    });
+  });
+}
+
+// ---------- kepatuhan (24 Nov, P52): cash back register, PPh 21 on incentives, orders not delivered ----------
+function vPatuh() {
+  var d = FIN.data, can = d.can.input, one = cvOne(), cb = (d.cb && d.cb.register) || { list: [] }, pil = (d.cb && d.cb.pilihan) || [], p21 = d.pph21 || { list: [] }, bk = (d.belumKirim || []).filter(function (x) { return !one || x.cv === one; });
+  var cbl = cb.list.filter(function (r) { return !one || r.cvs.indexOf(one) >= 0; });
+  var rk = { Tinggi: 't', Sedang: 's', Rendah: 'ok' };
+  var cbRows = cbl.map(function (r, i) {
+    return '<tr data-s="' + esc(r.school) + '"><td><b style="font-weight:600">' + esc(r.school) + '</b>' + mut2((r.negeri ? 'Sekolah negeri' : 'Swasta') + ' · ' + r.invoices + ' invoice · CV ' + esc(r.cvs.join(', '))) + '</td>' +
+      '<td class="n">' + rpc(r.cbs) + mut2(String(r.pct).replace('.', ',') + '% dari penjualan') + '</td><td><span class="pill ' + rk[r.risiko] + '">' + esc(r.risiko) + '</span></td>' +
+      '<td>' + (can ? '<select class="cbPen" aria-label="Penerima cash back">' + pil.map(function (o) { return '<option' + (o === r.penerima ? ' selected' : '') + '>' + esc(o) + '</option>'; }).join('') + '</select><input type="text" class="cbJab" value="' + esc(r.jabatan) + '" placeholder="jabatan, kalau orang" style="margin-top:6px;width:100%"><button class="btn sm cbGo" type="button" style="margin-top:6px">Simpan</button>' : esc(r.penerima + (r.jabatan ? ' (' + r.jabatan + ')' : ''))) + '</td></tr>';
+  }).join('');
+  var pRows = p21.list.filter(function (r) { return !one || r.cv === one; }).map(function (r) {
+    return '<tr><td>' + esc(BULAN[+r.bulan.slice(5, 7) - 1] + ' ' + r.bulan.slice(0, 4)) + mut2('CV ' + esc(r.cv) + ' · ' + r.invoices + ' invoice') + '</td><td class="n">' + rpc(r.bruto) + '</td><td class="n">' + rpc(r.pph21) + '</td><td>' + esc(tgl(r.setorPaling)) + '</td><td class="n">' + rpc(r.biayaHilang) + '</td></tr>';
+  }).join('');
+  var bRows = bk.map(function (x) { return '<tr><td>' + esc(x.inv) + mut2(esc(x.school)) + '</td><td>CV ' + esc(x.cv) + '</td><td>' + esc(tgl(x.date)) + '</td><td class="n">' + rpc(x.dpp) + '</td><td>' + (x.paid ? 'Sudah dibayar ' + esc(tgl(x.paid)) : 'Belum') + '</td></tr>'; }).join('');
+  return '<div class="card"><h2>Cash back sekolah</h2><p class="sub">Cash back ke sekolah negeri yang dibayar ke orang termasuk gratifikasi (rabat ke pegawai negeri) dan tidak pernah boleh jadi biaya. Ke rekening sekolah tetap di luar faktur, jadi tidak mengurangi PPN. Yang paling aman: potongan harga langsung di SIPLah. Total periode ini ' + rp(cb.total || 0) + ', ke sekolah negeri ' + rp(cb.negeri || 0) + ', risiko tinggi ' + rp(cb.tinggi || 0) + '.</p>' +
+    (cbRows ? '<div class="tw"><table><thead><tr><th>Sekolah</th><th class="n">CB Sekolah</th><th>Risiko</th><th>Penerima</th></tr></thead><tbody>' + cbRows + '</tbody></table></div>' : '<div class="empty"><b>Tidak ada cash back sekolah</b>di periode ini.</div>') + '<p class="msg" id="cbMsg" role="status"></p></div>' +
+    '<div class="card"><h2>PPh 21 atas CB marketing dan insentif</h2><p class="sub">Uang ke orang yang membawa order kena PPh 21 bukan pegawai: 50% bruto x tarif Pasal 17, perkiraan di lapisan 5% (2,5% dari bruto). Tanpa bukti potong, biayanya tidak bisa dikurangkan (kolom terakhir, 11%). File order belum mencatat siapa penerimanya, jadi di sini per bulan. Total ' + rp(p21.bruto || 0) + ', PPh 21 sekitar ' + rp(p21.pph21 || 0) + '.</p>' +
+    (pRows ? '<div class="tw"><table><thead><tr><th>Bulan</th><th class="n">Bruto</th><th class="n">PPh 21 (perkiraan)</th><th>Setor paling lambat</th><th class="n">Biaya hilang tanpa bukti potong</th></tr></thead><tbody>' + pRows + '</tbody></table></div><div class="adj-acts"><button class="btn sm" type="button" id="p21Csv">Unduh CSV per invoice</button></div>' : '<div class="empty"><b>Tidak ada CB marketing atau insentif</b>di periode ini.</div>') + '</div>' +
+    '<div class="card"><h2>Order belum dikirim</h2><p class="sub">Penjualan diakui saat barang dikirim (Tgl Kirim di file order). Order di bawah belum punya Tgl Kirim, jadi belum masuk penjualan; uang yang sudah masuk dicatat sebagai uang muka. Kalau barangnya sebenarnya sudah dikirim, admin isi Tgl Kirim di DB_Order kolom G.</p>' +
+    (bRows ? '<div class="tw"><table><thead><tr><th>Invoice</th><th>CV</th><th>Tgl order</th><th class="n">Penjualan (DPP)</th><th>Pembayaran</th></tr></thead><tbody>' + bRows + '</tbody></table></div>' : '<div class="empty"><b>Semua order sudah dikirim</b>sampai akhir periode.</div>') + '</div>';
+}
+function bindPatuh() {
+  Array.prototype.forEach.call(document.querySelectorAll('.cbGo'), function (b) {
+    b.addEventListener('click', function () {
+      var tr = b.closest('tr'), m = $('cbMsg');
+      FIN.touched = true; b.disabled = true; b.textContent = 'Menyimpan...';
+      google.script.run.withSuccessHandler(function () { toast('Penerima cash back tersimpan'); finLoad(); })
+        .withFailureHandler(function (e) { b.disabled = false; b.textContent = 'Simpan'; m.className = 'msg err'; m.textContent = String(e && e.message || e); })
+        .finSetCbPenerima({ school: tr.getAttribute('data-s'), penerima: tr.querySelector('.cbPen').value, jabatan: tr.querySelector('.cbJab').value });
+    });
+  });
+  var c = $('p21Csv');
+  if (c) c.addEventListener('click', function () {
+    var rows = [['Bulan', 'CV', 'Invoice', 'Bruto', 'DPP 50%', 'PPh 21 perkiraan', 'Setor paling lambat']].concat((FIN.data.pph21.list || []).map(function (r) { return [r.bulan, r.cv, r.invoices, r.bruto, r.dpp, r.pph21, r.setorPaling]; }));
+    var csv = rows.map(function (r) { return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'pph21-insentif-' + FIN.data.period.to + '.csv'; document.body.appendChild(a); a.click(); a.remove();
+  });
+}
+
+// ---------- laporan (24 Nov, P52): statements and CALK per CV for the period, ready to print ----------
+function vLaporan() {
+  var d = FIN.data, one = cvOne(), R = rep(), L = R.labaRugi, N = R.neraca, nm = one ? (d.sk.cvName[one] || 'CV ' + one) : 'Gabungan CV SK, SL, ASK, RS, TS';
+  var per = tglLong(d.period.from) + ' sampai ' + tglLong(d.period.to);
+  var line = function (t, v, cls) { return '<tr class="' + (cls || '') + '"><td>' + t + '</td><td class="n">' + rpc(v) + '</td></tr>'; };
+  var items = function (lst) { return lst.map(function (x) { return line(esc(x.name), x.amount, 'acc'); }).join(''); };
+  var grp = function (g) { return (L.items[g] || []).map(function (x) { return line(esc(x.name), x.amount * (/^(jual|lainin)$/.test(g) ? 1 : -1), 'acc'); }).join(''); };
+  var pj = (d.pajak && d.pajak.list || []).filter(function (r) { return !one || r.cv === one; });
+  var fl = (d.flags || []).filter(function (f) { return !f.done && (f.co || 'SK') === 'SK'; });
+  var penting = fl.filter(function (f) { return /Bank sekolah|Invoice sekolah|Pendiri|Cash back|File order|Tutup buku/.test(f.area); }).slice(0, 8).map(function (f) { return '<li>' + esc(f.problem) + '</li>'; }).join('');
+  return '<div class="card lap"><div class="lap-act no-print"><p class="sub" style="margin:0">' + (one ? 'Laporan CV ' + esc(one) + '.' : 'Gabungan semua CV: untuk pendiri, bukan laporan resmi satu badan. Pilih satu CV di kanan atas untuk laporan per CV.') + ' Ganti periode di kanan atas (misalnya satu bulan untuk laporan bulanan).</p><button class="btn pri" type="button" id="lapPrint">Cetak / simpan PDF</button></div>' +
+    '<div class="lap-h"><b>' + esc(nm) + '</b><span>Laporan keuangan · ' + esc(per) + '</span><small>Disusun sistem dari file order, rekening koran dan penyesuaian, ' + esc(tglLong(d.period.today)) + '. Belum diaudit.</small></div>' +
+    '<h3>1. Laporan posisi keuangan per ' + esc(tglLong(d.period.to)) + '</h3><div class="tw"><table><tbody>' +
+    '<tr class="grp open"><td>Aset</td><td></td></tr>' + items(N.aset) + line('Jumlah aset', N.totalAset, 'sum') +
+    '<tr class="grp open"><td>Kewajiban</td><td></td></tr>' + items(N.kewajiban) + line('Jumlah kewajiban', N.totalKewajiban, 'sum') +
+    '<tr class="grp open"><td>Ekuitas</td><td></td></tr>' + items(N.ekuitas) + line('Jumlah ekuitas', N.totalEkuitas, 'sum') + line('Jumlah kewajiban dan ekuitas', N.totalKewajiban + N.totalEkuitas, 'total') + '</tbody></table></div>' +
+    '<h3>2. Laporan laba rugi ' + esc(per) + '</h3><div class="tw"><table><tbody>' +
+    grp('jual') + grp('potong') + line('Penjualan bersih', L.bersih, 'sum') + grp('hpp') + grp('langsung') + line('Laba kotor', L.kotor, 'sum') + grp('ops') + line('Laba operasional', L.operasional, 'sum') +
+    grp('lainin') + grp('lainout') + line('Laba sebelum pajak', L.sebelumPajak, 'sum') + grp('pajak') + line('Laba bersih', L.laba, 'total') + '</tbody></table></div>' +
+    '<h3>3. Catatan atas laporan keuangan</h3><div class="calk">' +
+    '<p><b>a. Umum.</b> ' + esc(nm) + ' menjual perlengkapan dan jasa untuk sekolah, terutama lewat SIPLah.</p>' +
+    '<p><b>b. Dasar penyusunan.</b> Laporan disusun berdasarkan SAK EMKM, dengan dasar akrual, dalam Rupiah. Laporan dibuat oleh sistem keuangan Sadya Kersa dari file order 2026, rekening koran BRI a.n. SADYA KERSA, penyesuaian dan saldo awal yang dicatat Wildan.</p>' +
+    '<p><b>c. Kebijakan akuntansi.</b></p><ul>' +
+    '<li>Penjualan diakui saat barang dikirim (Tgl Kirim), sebesar harga tanpa PPN. Uang yang diterima sebelum barang dikirim dicatat sebagai uang muka pelanggan.</li>' +
+    '<li>PPN yang dipungut SIPLah tidak dicatat sebagai pendapatan' + (L.ppn ? ' (periode ini ' + rp(L.ppn) + ')' : '') + '. PPh 22 yang dipungut SIPLah dicatat sebagai kredit pajak, atau sebagai PPh final 0,5% bila CV memakai skema final.</li>' +
+    '<li>Harga pokok penjualan dicatat bersamaan dengan penjualannya, dari harga pokok di file order. Cash back sekolah, CB marketing dan insentif dicatat sebagai biaya langsung.</li>' +
+    '<li>Potongan SIPLah per pencairan dicatat sebagai biaya operasional.</li>' +
+    '<li>Aset tetap dicatat sebesar harga perolehan dan disusutkan garis lurus sesuai kelompok PMK 72/2023.</li>' +
+    '<li>Pajak penghasilan badan dicatat sebagai perkiraan: tarif umum Pasal 31E (11% dari laba kena pajak untuk omzet sampai Rp 4,8 M), kecuali CV yang memakai PPh final 0,5%.</li></ul>' +
+    '<p><b>d. Pajak penghasilan.</b> ' + (pj.length ? pj.map(function (r) { return 'CV ' + esc(r.cv) + ': ' + esc(r.catatan || '') + (r.skema === 'umum' ? ' PPh perkiraan ' + rp(r.pajak) + ', sudah dipungut ' + rp(r.kredit) + ', kurang bayar ' + rp(r.kurang) + '.' : ''); }).join(' ') : 'Tidak ada.') + '</p>' +
+    '<p><b>e. Hal penting yang memengaruhi angka di atas.</b></p>' + (penting ? '<ul>' + penting + '</ul>' : '<p>Tidak ada catatan terbuka.</p>') +
+    '</div><div class="lap-ttd"><div>Disiapkan oleh<br><br><br>Wildan</div><div>Disetujui oleh<br><br><br>Firman</div></div></div>';
+}
+function bindLaporan() { var b = $('lapPrint'); if (b) b.addEventListener('click', function () { window.print(); }); }
+
 // ---------- tutup buku (24 Nov, P50) ----------
 function vTutup() {
   var t = FIN.data.tutup || [], can = FIN.data.can.input, mut = function (x, c) { return '<div style="font-size:11.5px;color:' + (c || 'var(--muted)') + ';margin-top:2px">' + x + '</div>'; };
@@ -1446,7 +1584,7 @@ function vBank() {
     '<div class="t"><b>Upload rekening koran BRI</b><span>Tarik PDF dari IBBIZ ke sini, atau pilih file. Baris yang sudah ada dilewati.</span><p class="msg" id="bkMsg" role="status"></p></div>' +
     '<select id="bkAcc" aria-label="Rekening">' + SITE.acc.map(function (a) { return '<option value="' + a[0] + '">' + esc(a[1]) + '</option>'; }).join('') + '</select>' +
     '<label class="btn pri" for="bkFile">Pilih PDF</label><input type="file" id="bkFile" accept="application/pdf,.pdf" hidden></div>' : '';
-  var flt = { todo: function (l) { return l.status === 'Perlu dicek' || l.status === 'Perlu konfirmasi' || (l.tal && l.tal.sisa > 1); }, tal: function (l) { return !!l.tal; }, all: function () { return true; }, auto: function (l) { return l.status === 'Otomatis' || l.status === 'Dikonfirmasi'; }, ask: function (l) { return l.account === 'ASK'; } }[FIN.bankFilter];
+  var flt = { todo: function (l) { return l.status === 'Perlu dicek' || l.status === 'Perlu konfirmasi' || (l.tal && l.tal.sisa > 1); }, tal: function (l) { return !!l.tal; }, sip: function (l) { return l.siplah && !l.inv; }, all: function () { return true; }, auto: function (l) { return l.status === 'Otomatis' || l.status === 'Dikonfirmasi'; }, ask: function (l) { return l.account === 'ASK'; } }[FIN.bankFilter];
   var one = cvOne(), ls = b.lines.filter(flt).filter(function (l) { return !one || l.cv === one; }), lastDay = '';
   var opt = function (sel) { return '<option value="">Pilih akun...</option>' + b.options.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === sel ? ' selected' : '') + '>' + esc(o.name) + '</option>'; }).join(''); };
   var rows = ls.map(function (l) {
@@ -1455,8 +1593,9 @@ function vBank() {
     return dayH + '<div class="tx" data-id="' + esc(l.id) + '" data-inv="' + esc(l.inv) + '"><span class="av' + (inflow ? ' in' : '') + '">' + esc(initials(l.desc)) + '</span>' +
       '<div class="d"><b>' + esc(l.desc || 'Mutasi bank') + (l.account === 'SK' && l.cv && l.cv !== 'SK' ? '<span class="cvtag">CV ' + esc(l.cv) + '</span>' : '') + (l.pendiri ? '<span class="cvtag" style="background:#fff1ea;color:var(--accent)">Talangan pendiri?</span>' : '') + '</b><span>' + esc(l.time) + ' · ' + (l.account === 'ASK' ? 'Rekening ASK, dicocokkan dengan Kas Bri' : esc(accName(l.acc))) + (l.note ? ' · ' + esc(l.note) : '') + '</span></div>' +
       '<div class="a' + (inflow ? ' in' : '') + '">' + (inflow ? '+' + rp(l.credit) : '-' + rp(l.debit)) + '<div style="margin-top:4px">' + statusPill(l.status) + '</div></div>' +
-      (l.tal ? talRow(l, can) : '') +
-      (edit ? '<div class="edit"><select class="bkSel" aria-label="Akun untuk baris ini">' + opt(l.acc) + '</select>' + (FIN_SITE === 'SK' ? '<select class="bkCv" aria-label="CV untuk baris ini" style="flex:0 0 auto;min-width:120px">' + ['', 'SK', 'SL', 'ASK', 'RS', 'TS'].map(function (c) { return '<option value="' + c + '"' + (c === (l.cvSet || '') ? ' selected' : '') + '>' + (c ? 'CV ' + c : 'CV ikut invoice') + '</option>'; }).join('') + '</select>' : '') + '<button class="btn bkOk" type="button">Konfirmasi</button></div>' : '') + '</div>';
+      (l.tal ? talRow(l, can) : '') + (l.kandidat ? poRow(l, can) : '') +
+      (edit ? '<div class="edit"><select class="bkSel" aria-label="Akun untuk baris ini">' + opt(l.acc) + '</select>' + (FIN_SITE === 'SK' ? '<select class="bkCv" aria-label="CV untuk baris ini" style="flex:0 0 auto;min-width:120px">' + ['', 'SK', 'SL', 'ASK', 'RS', 'TS'].map(function (c) { return '<option value="' + c + '"' + (c === (l.cvSet || '') ? ' selected' : '') + '>' + (c ? 'CV ' + c : 'CV ikut invoice') + '</option>'; }).join('') + '</select>' : '') + (l.debit && openBills().length ? '<select class="bkTg" aria-label="Tagihan vendor yang dibayar" style="flex:0 0 auto;min-width:170px"><option value="">Tagihan vendor (kalau bayar vendor)</option>' + openBills().map(function (b) { return '<option value="' + esc(b.id) + '">' + esc(b.vendor + ' ' + (b.no || b.id) + ', sisa ' + rp(b.sisa)) + '</option>'; }).join('') + '</select>' : '') +
+      '<button class="btn bkOk" type="button">Konfirmasi</button></div>' : '') + '</div>';
   }).join('');
   var chips = !SITE.chips.length ? '' : '<div class="chips" id="bkChips">' + SITE.chips.map(function (c) { return '<button type="button" data-v="' + c[0] + '" aria-pressed="' + (FIN.bankFilter === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div>';
   return '<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">' + st + '</div>' + up +
@@ -1477,13 +1616,31 @@ function talRow(l, can) {
     '<label><span>Jumlah (Rp)</span><input type="text" class="talAmt" inputmode="numeric" value="' + dots(t.sisa) + '"></label>' +
     '<label><span>CV</span><select class="talCv">' + cvs.map(function (c) { return '<option value="' + esc(c) + '">CV ' + esc(c) + '</option>'; }).join('') + '</select></label>' +
     '<label><span>Invoice (kalau ada)</span><input type="text" class="talInv" placeholder="INV-..."></label>' +
+    (openBills().length ? '<label><span>Tagihan vendor (kalau bayar vendor)</span><select class="talTg"><option value="">-</option>' + openBills().map(function (b) { return '<option value="' + esc(b.id) + '">' + esc(b.vendor + ' ' + (b.no || b.id) + ', sisa ' + rp(b.sisa)) + '</option>'; }).join('') + '</select></label>' : '') +
     '<label class="w2"><span>Penerima dan untuk apa</span><input type="text" class="talDesc" placeholder="Toko Contoh, kertas A4 untuk SDN ..."></label>' +
     '<label><span>Tanggal dipakai</span><input type="date" class="talDate" value="' + esc(l.date) + '" min="' + esc(l.date) + '"></label>' +
     '<label class="w2"><span>Bukti (no. nota, link foto)</span><input type="text" class="talBukti" placeholder="Nota 0123 / link Drive"></label></div>' +
     '<div class="adj-acts"><button class="btn pri talSave" type="button">Simpan rincian</button></div><p class="msg talMsg" role="status"></p></div>';
   return '<div class="tal">' + head + (parts ? '<ul class="tal-p">' + parts + '</ul>' : '') + form + '</div>';
 }
+// 24 Nov (P52): open supplier bills, and the "Hubungkan PO" row for a SIPLah payout with no invoice
+function openBills() { var v = FIN.data && FIN.data.vendor; return v && v.list ? v.list.filter(function (b) { return b.sisa > 1; }) : []; }
+function poRow(l, can) {
+  var k = l.kandidat || [];
+  if (!k.length) return '<div class="tal"><div class="tal-h"><b>Hubungkan ke order</b><span>Tidak ada order dengan Net setidaknya ' + rp(l.credit) + ' dalam 10 hari dari tanggal pesanan PO ini. Admin cek apakah ordernya sudah ada di file order.</span></div></div>';
+  return '<div class="tal"><div class="tal-h"><b>Hubungkan ke order</b><span>Pilih order yang dibayar dengan ' + esc(l.po) + '. Nomor PO-nya ditulis ke file order (DB_Order kolom K), lalu sistem mencocokkannya.</span></div>' +
+    (can ? '<div class="edit" style="margin-top:8px"><select class="poSel" aria-label="Order untuk PO ini">' + k.map(function (x) { return '<option value="' + esc(x.inv) + '">' + esc(x.inv + ' · ' + x.school + ' · ' + tgl(x.date) + ' · Net ' + rp(x.net) + (x.po ? ' · sudah ada PO lain' : '') + (x.beda > 0 ? ' · selisih ' + rp(x.beda) : '')) + '</option>'; }).join('') + '</select><button class="btn sm pri poGo" type="button">Hubungkan</button></div><p class="msg poMsg" role="status"></p>' : '') + '</div>';
+}
 function bindBank() {
+  Array.prototype.forEach.call(document.querySelectorAll('.poGo'), function (b) {
+    b.addEventListener('click', function () {
+      var tx = b.closest('.tx'), sel = tx.querySelector('.poSel'), m = tx.querySelector('.poMsg');
+      FIN.touched = true; b.disabled = true; b.textContent = 'Menulis...'; m.className = 'msg poMsg'; m.textContent = '';
+      google.script.run.withSuccessHandler(function (r) { toast('PO ditulis ke ' + r.inv); finLoad(); })
+        .withFailureHandler(function (e) { b.disabled = false; b.textContent = 'Hubungkan'; m.className = 'msg poMsg err'; m.textContent = String(e && e.message || e); })
+        .finLinkPo(tx.getAttribute('data-id'), sel.value);
+    });
+  });
   Array.prototype.forEach.call(document.querySelectorAll('.talOpen'), function (b) { b.addEventListener('click', function () { var f = b.closest('.tal').querySelector('.tal-f'); f.hidden = !f.hidden; if (!f.hidden) f.querySelector('.talDesc').focus(); }); });
   Array.prototype.forEach.call(document.querySelectorAll('.talSave'), function (b) {
     b.addEventListener('click', function () {
@@ -1491,7 +1648,7 @@ function bindBank() {
       FIN.touched = true; b.disabled = true; b.textContent = 'Menyimpan...'; m.className = 'msg talMsg'; m.textContent = '';
       google.script.run.withSuccessHandler(function () { toast('Rincian tersimpan'); finLoad(); })
         .withFailureHandler(function (e) { b.disabled = false; b.textContent = 'Simpan rincian'; m.className = 'msg talMsg err'; m.textContent = String(e && e.message || e); })
-        .finAddTalangan({ line: tx.getAttribute('data-id'), acc: q('.talAcc'), amount: q('.talAmt'), cv: q('.talCv'), inv: q('.talInv'), desc: q('.talDesc'), date: q('.talDate'), bukti: q('.talBukti') });
+        .finAddTalangan({ line: tx.getAttribute('data-id'), acc: q('.talAcc'), amount: q('.talAmt'), cv: q('.talCv'), inv: f.querySelector('.talTg') && q('.talTg') ? q('.talTg') : q('.talInv'), desc: q('.talDesc'), date: q('.talDate'), bukti: q('.talBukti') });
     });
   });
   Array.prototype.forEach.call(document.querySelectorAll('.talX'), function (btn) {
@@ -1519,7 +1676,7 @@ function bindBank() {
       if (!acc) { sel.focus(); return; }
       btn.disabled = true; btn.textContent = 'Menyimpan...';
       google.script.run.withSuccessHandler(function () { finLoad(); }).withFailureHandler(function (e) { btn.disabled = false; btn.textContent = 'Konfirmasi'; $('finSub').textContent = e.message; })
-        .finSetBankLine(tx.getAttribute('data-id'), acc, /^SK:(119|121)$/.test(acc) ? tx.getAttribute('data-inv') : '', '', cvSel ? cvSel.value : '');
+        .finSetBankLine(tx.getAttribute('data-id'), acc, /^SK:(119|121)$/.test(acc) ? tx.getAttribute('data-inv') : acc === 'SK:211' && tx.querySelector('.bkTg') ? tx.querySelector('.bkTg').value : '', '', cvSel ? cvSel.value : '');
     });
   });
 }
