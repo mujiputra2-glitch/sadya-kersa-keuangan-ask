@@ -625,6 +625,13 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
 @media (max-width:520px){.call{padding:0}.call-card{border-radius:0;height:100%;max-height:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{.side,.topbar .acts,.cop,.dock,.toast,.drop,.chips{display:none!important}.app{display:block}.card{break-inside:avoid}}
+/* 24 Nov (P50): talangan breakdown on Rekening koran */
+.fx-grid label.w2{grid-column:span 2}
+.tal{grid-column:2 / 4;margin:4px 0 2px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fffaf6}
+.tal-h{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:12.5px}.tal-h span{color:var(--ink2)}.tal-h .btn{margin-left:auto}
+.tal-p{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}.tal-p li{display:flex;gap:10px;align-items:center;font-size:12.5px;color:var(--ink2)}.tal-p li span{flex:1;min-width:0}.tal-p li b{white-space:nowrap}
+.tal-f{margin-top:10px}
+@media (max-width:600px){.tal{grid-column:1 / -1}.tal-p li{flex-wrap:wrap}.fx-grid label.w2{grid-column:1 / -1}}
 </style>
 </head>
 <body>
@@ -662,6 +669,7 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
         <button type="button" role="tab" data-tab="proyek" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V8l7-4 7 4v9"/><path d="M8 17v-5h4v5"/></svg><span id="finProyekTab">Proyek dan sekolah</span></button>
         <button type="button" role="tab" data-tab="bank" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="15" height="11" rx="2"/><path d="M2.5 9h15M6 13h3"/></svg><span>Rekening koran</span></button>
         <button type="button" role="tab" data-tab="adj" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h12M4 10h7M4 14.5h5"/><path d="M15 11.5v6M12 14.5h6"/></svg><span>Penyesuaian</span></button>
+        <button type="button" role="tab" data-tab="tutup" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="12" height="8.5" rx="1.8"/><path d="M7 9V6.5a3 3 0 0 1 6 0V9"/></svg><span>Tutup buku</span></button>
         <button type="button" role="tab" data-tab="cek" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 17.5 16.5h-15L10 3.5z"/><path d="M10 9v3M10 14.3v.2"/></svg><span>Perlu dicek</span><span class="cnt" id="finBadge" hidden></span></button>
         <button type="button" role="tab" data-tab="sumber" aria-selected="false"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="10" cy="5" rx="6" ry="2.3"/><path d="M4 5v10c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3V5M4 10c0 1.3 2.7 2.3 6 2.3s6-1 6-2.3"/></svg><span>Sumber data</span></button>
       </div>
@@ -880,8 +888,8 @@ html.cop-lock,html.cop-lock body{overflow:hidden}
 // same API and the same access rows (tab Akses Dashboard) serve both; notes and bank lines are shown per company.
 var FIN_SITE = 'ASK', FIN_ASSETS = '/assets/';
 var SITE = {
-  SK: { brand: 'Sadya Kersa', sub: 'Keuangan sekolah (SK dan SL)', title: 'Keuangan Sadya Kersa (sekolah)', tab: 'Sekolah', load: 'Membaca file order 2026 dan rekening koran sekolah.', dash: true,
-    chips: [['todo', 'Perlu tindakan'], ['auto', 'Sudah cocok'], ['all', 'Semua']], acc: [['SK', 'BRI a.n. SADYA KERSA (sekolah)']] },
+  SK: { brand: 'Sadya Kersa', sub: 'Keuangan sekolah (semua CV)', title: 'Keuangan Sadya Kersa (sekolah)', tab: 'Sekolah', load: 'Membaca file order 2026 dan rekening koran sekolah.', dash: true,
+    chips: [['todo', 'Perlu tindakan'], ['tal', 'Talangan pendiri'], ['auto', 'Sudah cocok'], ['all', 'Semua']], acc: [['SK', 'BRI a.n. SADYA KERSA (sekolah)']] },
   ASK: { brand: 'Amanah Sadya Kersa', sub: 'Keuangan ASK (proyek)', title: 'Keuangan Amanah Sadya Kersa (ASK)', tab: 'Proyek', load: 'Membaca jurnal ASK dan rekening koran ASK.', dash: false,
     chips: [], acc: [['ASK', 'BRI ASK (pembanding Kas Bri)']] }
 }[FIN_SITE];
@@ -904,13 +912,13 @@ function finSiteUi() {
   $('finProyekTab').textContent = SITE.tab; TITLES.proyek = SITE.tab;
   if (!SITE.dash) $('finDash').remove();
   // 23 Nov: the four CVs and Penyesuaian are the SK side's only
-  if (FIN_SITE !== 'SK') { var at = document.querySelector('#finNav [data-tab="adj"]'); if (at) at.remove(); $('finCv').remove(); }
+  if (FIN_SITE !== 'SK') { ['adj', 'tutup'].forEach(function (t) { var at = document.querySelector('#finNav [data-tab="' + t + '"]'); if (at) at.remove(); }); $('finCv').remove(); }
   if ($('finLoadTxt')) $('finLoadTxt').textContent = SITE.load;
   Array.prototype.forEach.call(document.querySelectorAll('#finCo button'), function (b) { if (b.getAttribute('data-co') !== FIN_SITE) b.remove(); else b.setAttribute('aria-pressed', 'true'); });
 }
 var BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 var BULAN = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-var TITLES = { ringkasan: 'Ringkasan', lr: 'Laba rugi', neraca: 'Neraca', arus: 'Arus kas', proyek: 'Proyek dan sekolah', bank: 'Rekening koran', adj: 'Penyesuaian', cek: 'Perlu dicek', sumber: 'Sumber data' };
+var TITLES = { ringkasan: 'Ringkasan', lr: 'Laba rugi', neraca: 'Neraca', arus: 'Arus kas', proyek: 'Proyek dan sekolah', bank: 'Rekening koran', adj: 'Penyesuaian', tutup: 'Tutup buku', cek: 'Perlu dicek', sumber: 'Sumber data' };
 var CHAT_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H9l-4 3v-3H4A1.5 1.5 0 0 1 2.5 13V6A1.5 1.5 0 0 1 4 4.5z"/></svg>';
 var CHEV = '<svg class="chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4.5 2.5 8 6l-3.5 3.5"/></svg>';
 var OK_IC = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="6.5"/><path d="M5.3 8.2 7.2 10l3.5-4"/></svg>';
@@ -1022,11 +1030,11 @@ function finRender() {
   var d = FIN.data;
   $('finTitle').textContent = TITLES[FIN.tab];
   finStamp();
-  if (FIN.tab === 'adj' && FIN_SITE !== 'SK') FIN.tab = 'ringkasan';
-  var f = { ringkasan: vRingkasan, lr: vLabaRugi, neraca: vNeraca, arus: vArus, proyek: vProyek, bank: vBank, adj: vAdj, cek: vCek, sumber: vSumber }[FIN.tab];
+  if ((FIN.tab === 'adj' || FIN.tab === 'tutup') && FIN_SITE !== 'SK') FIN.tab = 'ringkasan';
+  var f = { ringkasan: vRingkasan, lr: vLabaRugi, neraca: vNeraca, arus: vArus, proyek: vProyek, bank: vBank, adj: vAdj, tutup: vTutup, cek: vCek, sumber: vSumber }[FIN.tab];
   $('finMain').innerHTML = '<div class="view">' + f() + '</div>';
   var mn = $('finMain'); mn.onclick = mn.oninput = mn.onchange = mn.onkeydown = null; // Perlu dicek binds these
-  var after = { ringkasan: drawRingkasan, lr: bindLR, arus: drawArus, proyek: drawProyek, bank: bindBank, adj: bindAdj, cek: bindCek, sumber: bindSumber }[FIN.tab];
+  var after = { ringkasan: drawRingkasan, lr: bindLR, arus: drawArus, proyek: drawProyek, bank: bindBank, adj: bindAdj, tutup: bindTutup, cek: bindCek, sumber: bindSumber }[FIN.tab];
   if (after) after();
 }
 
@@ -1181,7 +1189,25 @@ function vLabaRugi() {
     group('Penjualan', 'jual', 'jual') + group('Potongan dan pajak penjualan', 'potong', 'potong', -1) + sum('Penjualan bersih', 'bersih') +
     group('Harga pokok barang dan material', 'hpp', 'hpp', -1) + group('Biaya langsung (upah proyek, cash back, insentif)', 'langsung', 'langsung', -1) + sum('Laba kotor', 'kotor') +
     group('Biaya operasional', 'ops', 'ops', -1) + sum('Laba operasional', 'operasional') + group('Pendapatan lain', 'lainIn', 'lainin') + group('Biaya lain', 'lainOut', 'lainout', -1) +
-    sum('Laba bersih', 'laba', 'total') + '</tbody></table></div></div>';
+    (main.pajak ? sum('Laba sebelum pajak', 'sebelumPajak') + group('Pajak penghasilan', 'pajak', 'pajak', -1) + sum('Laba bersih setelah pajak', 'laba', 'total') : sum('Laba bersih', 'laba', 'total')) +
+    '</tbody></table></div>' + (main.ppn ? '<p class="sub" style="margin-top:10px">PPN yang dipungut SIPLah dari invoice periode ini: <b>' + rp(main.ppn) + '</b>. Bukan penjualan: SIPLah menyetorkannya langsung, jadi tidak masuk angka di atas. PPh 22 yang dipungut SIPLah dicatat sebagai kredit pajak (Neraca), atau sebagai PPh final 0,5% kalau Profil Pajak CV itu final.</p>' : '') + '</div>' + vPajak();
+}
+// 24 Nov (P50): the estimated income tax per CV (FinanceCore SKFIN.perkiraanPajak)
+function vPajak() {
+  var pj = FIN.data.pajak, one = cvOne();
+  if (FIN_SITE !== 'SK' || !pj || !pj.list || !pj.list.length) return '';
+  var ls = pj.list.filter(function (r) { return !one || r.cv === one; });
+  if (!ls.length) return '';
+  var nm = { umum: 'Tarif umum (Pasal 31E)', final: 'PPh final 0,5%', jurnal: 'Dihitung di halaman ASK' };
+  var rows = ls.map(function (r) {
+    var j = r.skema === 'jurnal';
+    return '<tr><td><b>CV ' + esc(r.cv) + '</b><div style="font-size:11.5px;color:var(--muted)">' + esc(nm[r.skema] || r.skema) + (r.dianggap && r.skema === 'umum' ? ', dianggap (Profil Pajak kosong)' : '') + '</div></td>' +
+      '<td class="n">' + (j ? '' : rpc(r.sebelumPajak)) + '</td><td class="n">' + (j || r.skema === 'final' ? '' : rpc(r.koreksi)) + '</td><td class="n">' + (j || r.skema === 'final' ? '' : rpc(r.pkp)) + '</td>' +
+      '<td class="n">' + (j ? '' : rpc(r.pajak)) + '</td><td class="n">' + (j ? '' : rpc(r.kredit)) + '</td><td class="n">' + (j || r.skema === 'final' ? '' : rpc(r.kurang)) + '</td></tr>' +
+      '<tr class="acc"><td colspan="7" style="white-space:normal;font-size:12px;color:var(--muted)">' + esc(r.catatan || '') + '</td></tr>';
+  }).join('');
+  return '<div class="card"><h2>Perkiraan PPh badan</h2><p class="sub">Per CV, sampai ' + esc(tglLong(pj.sampai)) + '. Sudah dicatat di Laba rugi (Pajak penghasilan) dan Neraca (Hutang PPh badan, perkiraan). Angka pasti untuk SPT tetap dicek konsultan pajak; biaya yang belum tercatat (gaji, kantor, pengiriman) akan menurunkannya.</p>' +
+    '<div class="tw"><table><thead><tr><th>CV</th><th class="n">Laba sebelum pajak</th><th class="n">CB Sekolah (bukan biaya)</th><th class="n">Laba kena pajak</th><th class="n">PPh</th><th class="n">PPh 22 sudah dipungut</th><th class="n">Kurang bayar</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
 }
 function bindLR() {
   Array.prototype.forEach.call(document.querySelectorAll('tr.grp'), function (tr) {
@@ -1296,10 +1322,29 @@ function vAdj() {
   var rows = a.list.map(function (x) {
     var on = /^aktif/i.test(x.status);
     return '<tr class="' + (on ? '' : 'off') + '" data-id="' + esc(x.id) + '"><td>' + esc(tgl(x.date)) + '<div style="font-size:11px;color:var(--muted)">' + esc(x.id) + '</div></td><td>CV ' + esc(x.cv) + '</td><td>' + esc(x.desc) + (x.ref ? '<div style="font-size:11.5px;color:var(--muted)">' + esc(x.ref) + '</div>' : '') + (x.why ? '<div style="font-size:11.5px;color:var(--muted)">Alasan: ' + esc(x.why) + '</div>' : '') + '</td>' +
-      '<td>' + esc(nm(x.debit)) + '</td><td>' + esc(nm(x.credit)) + '</td><td class="n">' + rpc(x.amount) + '</td><td><span class="adj-st' + (on ? '' : ' off') + '">' + esc(on ? 'Aktif' : x.status) + '</span>' + (on && can ? '<div style="margin-top:6px"><button class="btn sm adjX" type="button">Batalkan</button></div>' : '') + '</td></tr>';
+      '<td>' + esc(nm(x.debit)) + '</td><td>' + esc(nm(x.credit)) + (x.bukti ? '<div style="font-size:11.5px;color:var(--muted)">Bukti: ' + esc(x.bukti) + '</div>' : '') + '</td><td class="n">' + rpc(x.amount) + '</td><td><span class="adj-st' + (on ? '' : ' off') + '">' + esc(on ? 'Aktif' : x.status) + '</span>' + (on && can ? '<div style="margin-top:6px"><button class="btn sm adjX" type="button">Batalkan</button></div>' : '') + '</td></tr>';
   }).join('');
   return '<div class="card"><h2>Penyesuaian</h2><p class="sub">Untuk kejadian nyata yang tidak tercatat otomatis: selisih invoice dan pembayaran (misalnya Rp 300 rb dibayarkan di lokasi pelanggan), biaya perusahaan dibayar pribadi pendiri, dana talangan pendiri yang sudah dijelaskan, atau pindah akun. Rekening bank tidak diubah di sini.</p>' + form + '</div>' +
-    '<div class="card"><h2>Daftar penyesuaian</h2>' + (rows ? '<div class="tw"><table><thead><tr><th>Tanggal</th><th>CV</th><th>Uraian</th><th>Debet</th><th>Kredit</th><th class="n">Jumlah</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="empty"><b>Belum ada penyesuaian</b>Semua angka masih dari file order dan rekening koran.</div>') + '</div>';
+    '<div class="card"><h2>Daftar penyesuaian</h2>' + (rows ? '<div class="tw"><table><thead><tr><th>Tanggal</th><th>CV</th><th>Uraian</th><th>Debet</th><th>Kredit</th><th class="n">Jumlah</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="empty"><b>Belum ada penyesuaian</b>Semua angka masih dari file order dan rekening koran.</div>') + '</div>' + vSaldo();
+}
+// 24 Nov (P50): what each CV owned and owed on 31 December last year, beyond the bank and the school receivable
+function vSaldo() {
+  var sa = FIN.data.saldo, can = FIN.data.can.input;
+  if (!sa) return '';
+  var cvs = (FIN.data.adj && FIN.data.adj.cvs) || ['SK'], th = sa.tahun - 1, akun = function (id) { return (sa.akun.filter(function (a) { return a.id === id; })[0] || { name: id }).name; };
+  var form = !can ? '' : '<div class="fixbox" id="saBox" style="animation:none"><div class="fx-h"><b>Tambah saldo awal</b><span>Per CV, per 31 Desember ' + th + '.</span></div><div class="fx-grid">' +
+    '<label><span>CV</span><select id="saCv">' + cvs.map(function (c) { return '<option value="' + esc(c) + '"' + (c === (cvOne() || 'SK') ? ' selected' : '') + '>CV ' + esc(c) + '</option>'; }).join('') + '</select></label>' +
+    '<label><span>Akun</span><select id="saAcc"><option value="">Pilih akun...</option>' + sa.akun.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name) + (a.side === 'K' ? ' (kewajiban/modal)' : '') + '</option>'; }).join('') + '</select></label>' +
+    '<label><span>Jumlah (Rp)</span><input type="text" id="saAmt" inputmode="numeric" placeholder="12.500.000"></label>' +
+    '<label class="w3"><span>Catatan (sumber angkanya)</span><input type="text" id="saNote" placeholder="Neraca 31 Des ' + th + ' dari Wildan / SPT ' + th + '"></label></div>' +
+    '<div class="adj-acts"><button class="btn pri" type="button" id="saSave">Simpan saldo awal</button></div><p class="msg" id="saMsg" role="status"></p></div>';
+  var rows = sa.list.map(function (x) {
+    var on = /^aktif/i.test(x.status);
+    return '<tr class="' + (on ? '' : 'off') + '" data-id="' + esc(x.id) + '"><td>CV ' + esc(x.cv) + '<div style="font-size:11px;color:var(--muted)">' + esc(x.id) + '</div></td><td>' + esc(akun(x.acc)) + '<div style="font-size:11.5px;color:var(--muted)">' + esc(x.note) + '</div></td><td class="n">' + rpc(x.amount) + '</td>' +
+      '<td><span class="adj-st' + (on ? '' : ' off') + '">' + esc(on ? 'Aktif' : x.status) + '</span>' + (on && can ? '<div style="margin-top:6px"><button class="btn sm saX" type="button">Batalkan</button></div>' : '') + '</td></tr>';
+  }).join('');
+  return '<div class="card"><h2>Saldo awal per 31 Desember ' + th + '</h2><p class="sub">Yang dimiliki dan dihutang tiap CV saat tahun dimulai: hutang vendor atau cash back yang belum dibayar, hutang ke Firman, aset tetap, persediaan, kas atau rekening lain, modal disetor. Bank BRI dan piutang sekolah sudah otomatis. Selisihnya menjadi Laba ditahan sampai ' + th + '.</p>' + form +
+    (rows ? '<div class="tw"><table><thead><tr><th>CV</th><th>Akun</th><th class="n">Jumlah</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></div>' : '<div class="empty"><b>Belum ada saldo awal</b>Neraca awal tahun hanya berisi bank dan piutang sekolah.</div>') + '</div>';
 }
 function bindAdj() {
   var a = FIN.data.adj || { presets: [] }, pr = $('adjPreset');
@@ -1317,6 +1362,25 @@ function bindAdj() {
       .withFailureHandler(function (e) { save.disabled = false; save.textContent = 'Simpan penyesuaian'; m.className = 'msg err'; m.textContent = String(e && e.message || e); })
       .finAddAdjust(x);
   });
+  var sv = $('saSave');
+  if (sv) sv.addEventListener('click', function () {
+    FIN.touched = true;
+    var x = { cv: $('saCv').value, acc: $('saAcc').value, amount: $('saAmt').value, note: $('saNote').value }, m = $('saMsg');
+    sv.disabled = true; sv.textContent = 'Menyimpan...'; m.className = 'msg'; m.textContent = '';
+    google.script.run.withSuccessHandler(function (r) { toast('Saldo awal ' + r.id + ' tersimpan'); finLoad(); })
+      .withFailureHandler(function (e) { sv.disabled = false; sv.textContent = 'Simpan saldo awal'; m.className = 'msg err'; m.textContent = String(e && e.message || e); })
+      .finAddOpening(x);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.saX'), function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-sure') !== '1') { btn.setAttribute('data-sure', '1'); btn.textContent = 'Yakin batalkan?'; return; }
+      var id = btn.closest('tr').getAttribute('data-id');
+      btn.disabled = true; btn.textContent = 'Membatalkan...';
+      google.script.run.withSuccessHandler(function () { toast('Saldo awal ' + id + ' dibatalkan'); finLoad(); })
+        .withFailureHandler(function (e) { btn.disabled = false; btn.textContent = 'Batalkan'; btn.removeAttribute('data-sure'); $('finSub').textContent = String(e && e.message || e); })
+        .finCancelOpening(id, '');
+    });
+  });
   Array.prototype.forEach.call(document.querySelectorAll('.adjX'), function (btn) {
     btn.addEventListener('click', function () {
       if (btn.getAttribute('data-sure') !== '1') { btn.setAttribute('data-sure', '1'); btn.textContent = 'Yakin batalkan?'; return; }
@@ -1329,9 +1393,51 @@ function bindAdj() {
   });
 }
 
+// ---------- tutup buku (24 Nov, P50) ----------
+function vTutup() {
+  var t = FIN.data.tutup || [], can = FIN.data.can.input, mut = function (x, c) { return '<div style="font-size:11.5px;color:' + (c || 'var(--muted)') + ';margin-top:2px">' + x + '</div>'; };
+  var rows = t.slice().reverse().map(function (m) {
+    var st = m.status === 'Ditutup' ? (m.berubah ? '<span class="pill t">Berubah sesudah ditutup</span>' : '<span class="pill ok">Ditutup</span>') : m.status === 'Dibuka' ? '<span class="pill s">Dibuka lagi</span>' : '<span class="pill r">Terbuka</span>';
+    var who = m.status === 'Ditutup' ? mut(esc(m.by) + ', ' + esc(tgl(m.at))) : m.status === 'Dibuka' ? mut('Dibuka ' + esc(m.bukaBy) + ', ' + esc(tgl(m.bukaAt)) + ': ' + esc(m.alasan)) : '';
+    var act = !can ? '' : m.status === 'Ditutup' ? '<button class="btn sm tpBuka" type="button">Buka</button>' : !m.selesai ? mut('Belum selesai') :
+      !m.bankBaris ? mut('Rekening koran belum ada') : m.bankBuka ? mut(m.bankBuka + ' mutasi belum beres') : '<button class="btn sm pri tpTutup" type="button">Tutup bulan</button>';
+    return '<tr data-m="' + esc(m.bulan) + '"><td><b>' + esc(BULAN[+m.bulan.slice(5, 7) - 1]) + '</b>' + mut(m.invoices + ' invoice, ' + (m.bankBaris ? m.bankBaris + ' mutasi bank' : 'belum ada rekening koran')) + '</td>' +
+      '<td class="n">' + rpc(m.jual) + '</td><td class="n">' + rpc(m.laba) + '</td><td>' + st + who + (m.berubah ? mut(esc(m.teks.slice(0, 4).join('; ')), 'var(--accent)') : '') + '</td><td class="tpAct">' + act + '</td></tr>';
+  }).join('');
+  return '<div class="card"><h2>Tutup buku per bulan</h2><p class="sub">Bulan yang ditutup dikunci: penyesuaian, akun mutasi bank dan tanggal lunas di bulan itu tidak bisa diubah lagi, dan perubahan di file order sesudahnya langsung muncul di sini dan di Perlu dicek. Tutup sesudah rekening koran bulan itu diunggah dan semua mutasinya beres. Membuka lagi perlu alasan.</p>' +
+    '<div class="tw"><table><thead><tr><th>Bulan</th><th class="n">Penjualan</th><th class="n">Laba sebelum PPh badan</th><th>Status</th><th></th></tr></thead><tbody>' + (rows || '') + '</tbody></table></div><p class="msg" id="tpMsg" role="status"></p></div>';
+}
+function bindTutup() {
+  var msg = function (t, err) { var m = $('tpMsg'); m.className = 'msg' + (err ? ' err' : ''); m.textContent = t; };
+  Array.prototype.forEach.call(document.querySelectorAll('.tpTutup'), function (btn) {
+    btn.addEventListener('click', function () {
+      var ym = btn.closest('tr').getAttribute('data-m');
+      if (btn.getAttribute('data-sure') !== '1') { btn.setAttribute('data-sure', '1'); btn.textContent = 'Yakin tutup?'; return; }
+      FIN.touched = true; btn.disabled = true; btn.textContent = 'Menutup...';
+      google.script.run.withSuccessHandler(function (r) { toast('Bulan ' + BULAN[+ym.slice(5, 7) - 1] + ' ditutup (' + r.invoices + ' invoice)'); finLoad(); })
+        .withFailureHandler(function (e) { btn.disabled = false; btn.textContent = 'Tutup bulan'; btn.removeAttribute('data-sure'); msg(String(e && e.message || e), true); })
+        .finTutupBulan(ym);
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.tpBuka'), function (btn) {
+    btn.addEventListener('click', function () {
+      var cell = btn.closest('.tpAct'), ym = btn.closest('tr').getAttribute('data-m');
+      cell.innerHTML = '<input type="text" class="tpWhy" placeholder="Alasan membuka" aria-label="Alasan membuka bulan" style="min-width:160px"><div style="margin-top:6px"><button class="btn sm pri tpGo" type="button">Buka bulan</button></div>';
+      cell.querySelector('.tpWhy').focus();
+      cell.querySelector('.tpGo').addEventListener('click', function () {
+        var go = cell.querySelector('.tpGo'), why = cell.querySelector('.tpWhy').value;
+        FIN.touched = true; go.disabled = true; go.textContent = 'Membuka...';
+        google.script.run.withSuccessHandler(function () { toast('Bulan ' + BULAN[+ym.slice(5, 7) - 1] + ' dibuka'); finLoad(); })
+          .withFailureHandler(function (e) { go.disabled = false; go.textContent = 'Buka bulan'; msg(String(e && e.message || e), true); })
+          .finBukaBulan(ym, why);
+      });
+    });
+  });
+}
+
 // ---------- rekening koran ----------
 function accName(id) { var o = FIN.data.bank.options.filter(function (x) { return x.id === id; })[0]; return o ? o.name : id ? id : 'Belum ada akun'; }
-function statusPill(s) { return '<span class="pill ' + ({ 'Otomatis': 'auto', 'Dikonfirmasi': 'ok', 'Perlu konfirmasi': 's', 'Perlu dicek': 't', 'Pembanding': 'r' }[s] || 'r') + '">' + esc(s) + '</span>'; }
+function statusPill(s) { return '<span class="pill ' + ({ 'Otomatis': 'auto', 'Dikonfirmasi': 'ok', 'Dijelaskan': 'ok', 'Perlu konfirmasi': 's', 'Perlu dicek': 't', 'Pembanding': 'r' }[s] || 'r') + '">' + esc(s) + '</span>'; }
 function initials(s) { var w = String(s || '').replace(/[^A-Za-z0-9 ]+/g, ' ').trim().split(/\s+/); return ((w[0] || '?').charAt(0) + (w[1] || '').charAt(0)).toUpperCase(); }
 function vBank() {
   var b = FIN.data.bank, can = FIN.data.can.input;
@@ -1340,7 +1446,7 @@ function vBank() {
     '<div class="t"><b>Upload rekening koran BRI</b><span>Tarik PDF dari IBBIZ ke sini, atau pilih file. Baris yang sudah ada dilewati.</span><p class="msg" id="bkMsg" role="status"></p></div>' +
     '<select id="bkAcc" aria-label="Rekening">' + SITE.acc.map(function (a) { return '<option value="' + a[0] + '">' + esc(a[1]) + '</option>'; }).join('') + '</select>' +
     '<label class="btn pri" for="bkFile">Pilih PDF</label><input type="file" id="bkFile" accept="application/pdf,.pdf" hidden></div>' : '';
-  var flt = { todo: function (l) { return l.status === 'Perlu dicek' || l.status === 'Perlu konfirmasi'; }, all: function () { return true; }, auto: function (l) { return l.status === 'Otomatis' || l.status === 'Dikonfirmasi'; }, ask: function (l) { return l.account === 'ASK'; } }[FIN.bankFilter];
+  var flt = { todo: function (l) { return l.status === 'Perlu dicek' || l.status === 'Perlu konfirmasi' || (l.tal && l.tal.sisa > 1); }, tal: function (l) { return !!l.tal; }, all: function () { return true; }, auto: function (l) { return l.status === 'Otomatis' || l.status === 'Dikonfirmasi'; }, ask: function (l) { return l.account === 'ASK'; } }[FIN.bankFilter];
   var one = cvOne(), ls = b.lines.filter(flt).filter(function (l) { return !one || l.cv === one; }), lastDay = '';
   var opt = function (sel) { return '<option value="">Pilih akun...</option>' + b.options.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === sel ? ' selected' : '') + '>' + esc(o.name) + '</option>'; }).join(''); };
   var rows = ls.map(function (l) {
@@ -1349,15 +1455,55 @@ function vBank() {
     return dayH + '<div class="tx" data-id="' + esc(l.id) + '" data-inv="' + esc(l.inv) + '"><span class="av' + (inflow ? ' in' : '') + '">' + esc(initials(l.desc)) + '</span>' +
       '<div class="d"><b>' + esc(l.desc || 'Mutasi bank') + (l.account === 'SK' && l.cv && l.cv !== 'SK' ? '<span class="cvtag">CV ' + esc(l.cv) + '</span>' : '') + (l.pendiri ? '<span class="cvtag" style="background:#fff1ea;color:var(--accent)">Talangan pendiri?</span>' : '') + '</b><span>' + esc(l.time) + ' · ' + (l.account === 'ASK' ? 'Rekening ASK, dicocokkan dengan Kas Bri' : esc(accName(l.acc))) + (l.note ? ' · ' + esc(l.note) : '') + '</span></div>' +
       '<div class="a' + (inflow ? ' in' : '') + '">' + (inflow ? '+' + rp(l.credit) : '-' + rp(l.debit)) + '<div style="margin-top:4px">' + statusPill(l.status) + '</div></div>' +
+      (l.tal ? talRow(l, can) : '') +
       (edit ? '<div class="edit"><select class="bkSel" aria-label="Akun untuk baris ini">' + opt(l.acc) + '</select>' + (FIN_SITE === 'SK' ? '<select class="bkCv" aria-label="CV untuk baris ini" style="flex:0 0 auto;min-width:120px">' + ['', 'SK', 'SL', 'ASK', 'RS', 'TS'].map(function (c) { return '<option value="' + c + '"' + (c === (l.cvSet || '') ? ' selected' : '') + '>' + (c ? 'CV ' + c : 'CV ikut invoice') + '</option>'; }).join('') + '</select>' : '') + '<button class="btn bkOk" type="button">Konfirmasi</button></div>' : '') + '</div>';
   }).join('');
   var chips = !SITE.chips.length ? '' : '<div class="chips" id="bkChips">' + SITE.chips.map(function (c) { return '<button type="button" data-v="' + c[0] + '" aria-pressed="' + (FIN.bankFilter === c[0]) + '">' + c[1] + '</button>'; }).join('') + '</div>';
   return '<div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">' + st + '</div>' + up +
-    '<div class="card"><h2>Mutasi</h2><p class="sub">Uang masuk yang nilainya sama dengan Net satu invoice dicocokkan otomatis. Transfer ke rekening pribadi pendiri dicatat sebagai dana talangan sampai Wildan menjelaskan dipakai untuk apa. Rekening ini milik CV SK; uang CV lain di dalamnya dicatat antar CV.' + (can ? '' : ' Pengisian akun dilakukan Wildan.') + '</p>' + chips +
+    '<div class="card"><h2>Mutasi</h2><p class="sub">Uang masuk dicocokkan ke invoice lewat nomor PO SIPLah (kolom No. Invoice SIPLah di file order), Net yang sama, atau Net dikurangi potongan SIPLah sekitar Rp 10.000 per pencairan (potongannya dicatat sebagai biaya). Transfer ke rekening pribadi pendiri dicatat sebagai dana talangan sampai Wildan merincinya (tombol Rincian): dipakai bayar apa, berapa, buktinya. Rekening ini milik CV SK; uang CV lain di dalamnya dicatat antar CV.' + (can ? '' : ' Pengisian akun dilakukan Wildan.') + '</p>' + chips +
     (rows || '<div class="empty"><b>Tidak ada mutasi di pilihan ini</b>' + (FIN.bankFilter === 'todo' ? 'Semua baris sudah punya akun.' : '') + '</div>') +
     (b.total > b.lines.length ? '<p class="sub" style="margin-top:12px">Menampilkan ' + b.lines.length + ' baris terbaru dari ' + b.total + '.</p>' : '') + '</div>';
 }
+// 24 Nov (P50): a transfer to a founder, explained part by part (each part is a Penyesuaian: debit what it paid, credit SK:135)
+function talRow(l, can) {
+  var t = l.tal, d = FIN.data, cvs = (d.adj && d.adj.cvs) || ['SK'], pakai = d.bank.pakai || [];
+  var name = function (id) { return (pakai.filter(function (x) { return x.acc === id; })[0] || { name: accName(id) }).name; };
+  var parts = t.parts.map(function (x) { return '<li data-id="' + esc(x.id) + '"><span>' + esc(tgl(x.date)) + ' · CV ' + esc(x.cv) + ' · ' + esc(name(x.acc)) + ': ' + esc(x.desc) + (x.bukti ? ' · bukti ' + esc(x.bukti) : ' · <i>tanpa bukti</i>') + '</span><b class="num">' + rp(x.amount) + '</b>' +
+    (can ? '<button class="btn sm talX" type="button">Batalkan</button>' : '') + '</li>'; }).join('');
+  var head = '<div class="tal-h"><b>Rincian dana talangan</b><span>Dirinci ' + rp(t.dijelaskan) + ' dari ' + rp(t.jumlah) + (t.sisa > 1 ? ', sisa <b>' + rp(t.sisa) + '</b> belum dijelaskan' : ', lengkap') + '</span>' +
+    (can && t.sisa > 1 ? '<button class="btn sm pri talOpen" type="button">Rincian</button>' : '') + '</div>';
+  var form = !can || t.sisa <= 1 ? '' : '<div class="tal-f" hidden><div class="fx-grid">' +
+    '<label><span>Dipakai untuk</span><select class="talAcc">' + pakai.map(function (x) { return '<option value="' + esc(x.acc) + '">' + esc(x.name) + '</option>'; }).join('') + '</select></label>' +
+    '<label><span>Jumlah (Rp)</span><input type="text" class="talAmt" inputmode="numeric" value="' + dots(t.sisa) + '"></label>' +
+    '<label><span>CV</span><select class="talCv">' + cvs.map(function (c) { return '<option value="' + esc(c) + '">CV ' + esc(c) + '</option>'; }).join('') + '</select></label>' +
+    '<label><span>Invoice (kalau ada)</span><input type="text" class="talInv" placeholder="INV-..."></label>' +
+    '<label class="w2"><span>Penerima dan untuk apa</span><input type="text" class="talDesc" placeholder="Toko Contoh, kertas A4 untuk SDN ..."></label>' +
+    '<label><span>Tanggal dipakai</span><input type="date" class="talDate" value="' + esc(l.date) + '" min="' + esc(l.date) + '"></label>' +
+    '<label class="w2"><span>Bukti (no. nota, link foto)</span><input type="text" class="talBukti" placeholder="Nota 0123 / link Drive"></label></div>' +
+    '<div class="adj-acts"><button class="btn pri talSave" type="button">Simpan rincian</button></div><p class="msg talMsg" role="status"></p></div>';
+  return '<div class="tal">' + head + (parts ? '<ul class="tal-p">' + parts + '</ul>' : '') + form + '</div>';
+}
 function bindBank() {
+  Array.prototype.forEach.call(document.querySelectorAll('.talOpen'), function (b) { b.addEventListener('click', function () { var f = b.closest('.tal').querySelector('.tal-f'); f.hidden = !f.hidden; if (!f.hidden) f.querySelector('.talDesc').focus(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('.talSave'), function (b) {
+    b.addEventListener('click', function () {
+      var tx = b.closest('.tx'), f = b.closest('.tal-f'), m = f.querySelector('.talMsg'), q = function (c) { return f.querySelector(c).value; };
+      FIN.touched = true; b.disabled = true; b.textContent = 'Menyimpan...'; m.className = 'msg talMsg'; m.textContent = '';
+      google.script.run.withSuccessHandler(function () { toast('Rincian tersimpan'); finLoad(); })
+        .withFailureHandler(function (e) { b.disabled = false; b.textContent = 'Simpan rincian'; m.className = 'msg talMsg err'; m.textContent = String(e && e.message || e); })
+        .finAddTalangan({ line: tx.getAttribute('data-id'), acc: q('.talAcc'), amount: q('.talAmt'), cv: q('.talCv'), inv: q('.talInv'), desc: q('.talDesc'), date: q('.talDate'), bukti: q('.talBukti') });
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.talX'), function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-sure') !== '1') { btn.setAttribute('data-sure', '1'); btn.textContent = 'Yakin batalkan?'; return; }
+      var id = btn.closest('li').getAttribute('data-id');
+      btn.disabled = true; btn.textContent = 'Membatalkan...';
+      google.script.run.withSuccessHandler(function () { toast('Rincian dibatalkan'); finLoad(); })
+        .withFailureHandler(function (e) { btn.disabled = false; btn.textContent = 'Batalkan'; btn.removeAttribute('data-sure'); $('finSub').textContent = String(e && e.message || e); })
+        .finCancelAdjust(id, '');
+    });
+  });
   var chips = $('bkChips');
   if (chips) chips.addEventListener('click', function (e) { var bt = e.target.closest('button'); if (!bt) return; FIN.bankFilter = bt.getAttribute('data-v'); finRender(); });
   var f = $('bkFile'), drop = $('bkDrop');
@@ -1418,7 +1564,7 @@ function bankUpload(f) {
 // writes to the source through Finance.js (Jurnal ASK input cells, Home year, bank accounts, Tgl Bayar). Notes Wildan
 // leaves as they are get "Sudah dicek" and stop counting. Founders who only view see the notes and the Copilot button.
 var EDIT_IC = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12.8 4.2 15.8 7.2 7.5 15.5H4.5v-3z"/><path d="M11 6l3 3"/></svg>';
-var FIX_LABEL = { row: 'Perbaiki baris', dates: 'Samakan tanggal', clear: 'Kosongkan baris', home: 'Ganti tahun', bank: 'Pilih akun', paid: 'Tandai lunas', upload: 'Upload rekening koran' };
+var FIX_LABEL = { row: 'Perbaiki baris', dates: 'Samakan tanggal', clear: 'Kosongkan baris', home: 'Ganti tahun', bank: 'Pilih akun', paid: 'Tandai lunas', upload: 'Upload rekening koran', talangan: 'Rinci transfer' };
 function vCek() {
   var d = FIN.data, can = d.can.input, open = d.flags.filter(function (f) { return !f.done; }), done = d.flags.filter(function (f) { return f.done; });
   var by = {}, order = [], rank = { Tinggi: 0, Sedang: 1, Rendah: 2 };
@@ -1596,6 +1742,7 @@ function bindCek() {
     if (t.hasAttribute('data-unack')) return fxRun(item, t, 'finUnackFlag', [f.key], 'Catatan dibuka lagi');
     if (t.hasAttribute('data-fix')) {
       if (f.act.kind === 'upload') return finTab('bank');
+      if (f.act.kind === 'talangan') { FIN.bankFilter = 'tal'; return finTab('bank'); }
       var openNow = slot.querySelector('.fixbox[data-kind="' + f.act.kind + '"]');
       Array.prototype.forEach.call(main.querySelectorAll('.fxslot'), function (s) { s.innerHTML = ''; });
       if (openNow) return;
